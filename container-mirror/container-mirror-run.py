@@ -44,7 +44,7 @@ def checkdbandsync(itemname):
     cursor.execute("SELECT name, skopeosynced FROM transferred WHERE name = ?", (itemname,))
     data=cursor.fetchone()
     if data is None:
-        print('There is no component named %s'%itemname)
+        print('New item. Calling Skopeo Sync for %s'%itemname)
         # Call Skopeo Sync Function
         skopeosubprocess(itemname)
         
@@ -53,7 +53,7 @@ def checkdbandsync(itemname):
         connection.commit()
         cursor.close()
     else:
-        print('Component already synced: ' + itemname)
+        print('Image already synced: ' + itemname)
 
 while True:
     # Using readlines() to iterate through list of repositories. 
