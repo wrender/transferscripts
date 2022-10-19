@@ -1,0 +1,57 @@
+
+# Skopeo Settings
+skopeo:
+  destination: "/tmp/wes/"
+  image: "quay.io/skopeo/stable"
+  dryrun: 'True'
+
+# RSYNC - Script uses RSYNC over SSH to sync files
+# RSYNC SSH Settings
+rsync:
+  sshuser: "wrender"
+  sshidentity: "~/.ssh/id_rsa"
+  sshserver: "192.168.1.6"
+  imagedestination: "/tmp/scopeo/"
+  ubuntumirrordestination: "/tmp/mirror/ubuntu/"
+
+# Ubuntu Repo Settings
+apt:
+  # Destination to sync to
+  destination: "/tmp/ubuntu/mirror"
+  # How often to sync in hours
+  frequency: 12
+  # Settings for sync and repos. Default Ubuntu 20.04
+  basepath: "/var/spool/apt-mirror"
+  nthreads: "20"
+  tilde: "0"
+  repos:
+    - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
+    - 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
+    - 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
+  clean: 'http://archive.ubuntu.com/ubuntu'
+
+# CentOS/RockyLinux Repo Settings
+yum:
+  # Destination to sync to
+  destination: "/tmp/mirror/centos"
+  frequency: 12
+  # How often to sync in hours
+  repos:
+    centos7-base:
+      repoid: 'centos-7-base'
+      name: 'CentOS 7 Base'
+      baseurl: 'http://mirror.centos.org/centos/7/os/x86_64/'
+      gpgcheck: '0'
+      enabled: '1'
+    centos7-updates:
+      repoid: 'centos-7-updates'
+      name: 'CentOS 7 Updates'
+      baseurl: 'http://mirror.centos.org/centos/7/updates/x86_64/'
+      gpgcheck: '0'
+      enabled: '1'   
+    centos7-extras:
+      repoid: 'centos-7-extras'
+      name: 'CentOS 7 Extras'
+      baseurl: 'http://mirror.centos.org/centos/7/extras/x86_64/'
+      gpgcheck: '0'
+      enabled: '1'    

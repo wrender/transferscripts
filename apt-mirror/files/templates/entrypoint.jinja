@@ -1,0 +1,8 @@
+#!/bin/bash
+# Refresh mirror every X hours
+while true;
+do
+  apt-mirror
+  echo "Start sleep {{ frequency }}h..."
+  sleep {{ frequency }}h
+done
