@@ -1,8 +1,5 @@
 #!/bin/bash
 # Refresh mirror every X hours
-while true;
-do
-  {% for repo in repos -%}
-  /bin/dnf reposync -g --delete -p /mnt/repos/ --repoid={{ repos[repo].repoid }} --newest-only --download-metadata
-  {% endfor %}
-done
+{% for repo in repos -%}
+/bin/dnf reposync -g --delete -p /mnt/repos/ --repoid={{ repos[repo].repoid }} --newest-only --download-metadata
+{% endfor %}
