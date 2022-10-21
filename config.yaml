@@ -22,12 +22,15 @@ apt:
   frequency: 12
   # Settings for sync and repos. Default Ubuntu 20.04
   basepath: "/var/spool/apt-mirror"
+  run_postmirror: '0'
   nthreads: "20"
   tilde: "0"
   repos:
     - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
-    - 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
-    - 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
+    - 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main'
+    - 'deb https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main'
+    #- 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
+    #- 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
   clean: 'http://archive.ubuntu.com/ubuntu'
 
 # CentOS/RockyLinux Repo Settings

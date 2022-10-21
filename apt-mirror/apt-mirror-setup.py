@@ -9,7 +9,7 @@ with open('../config.yaml') as f:
 from jinja2 import Environment, FileSystemLoader
 env = Environment(loader=FileSystemLoader('./files/templates'))
 template = env.get_template('ubuntu-mirrors.jinja')
-output_from_parsed_template = template.render(basepath=cfg['apt']['basepath'],nthreads=cfg['apt']['nthreads'],tilde=cfg['apt']['tilde'],repos=cfg['apt']['repos'],clean=cfg['apt']['clean'])
+output_from_parsed_template = template.render(apt=cfg['apt'])
 print(output_from_parsed_template)
 
 # Create mirrors from config file

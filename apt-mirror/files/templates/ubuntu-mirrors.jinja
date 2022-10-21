@@ -1,6 +1,6 @@
 ############# config ##################
 #
-set base_path    {{ basepath }}
+set base_path    {{ apt.basepath }}
 #
 # set mirror_path  $base_path/mirror
 # set skel_path    $base_path/skel
@@ -8,14 +8,18 @@ set base_path    {{ basepath }}
 # set cleanscript $var_path/clean.sh
 # set defaultarch  <running host architecture>
 # set postmirror_script $var_path/postmirror.sh
+{%- if apt.run_postmirror is defined and apt.run_postmirror|length %}
+set run_postmirror {{ apt.run_postmirror }}
+{% else %}
 # set run_postmirror 0
-set nthreads     {{ nthreads }}
-set _tilde {{ tilde }}
+{%- endif %}
+set nthreads     {{ apt.nthreads }}
+set _tilde {{ apt.tilde }}
 #
 ############# end config ##############
 
-{% for repo in repos -%}
+{% for repo in apt.repos -%}
 {{ repo }}
 {% endfor %}
 
-clean {{ clean }}
+clean {{ apt.clean }}

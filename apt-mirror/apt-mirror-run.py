@@ -9,4 +9,4 @@ with open('../config.yaml') as f:
 print('\n' + 'Running the container "apt-mirror" to sync to ' + cfg['apt']['destination'] + '\n')
 print('\n' + 'Run "docker logs apt-mirror" to view logs' + '\n')
 
-result = subprocess.run(['sudo','docker','run','--rm','-d','-v', cfg['apt']['destination'] + ':/var/spool/apt-mirror','--name','apt-mirror','apt-mirror:latest'], check=True)
+result = subprocess.run(['sudo','docker','run','--privileged','--rm','-d','-v', cfg['apt']['destination'] + ':/var/spool/apt-mirror','--name','apt-mirror','apt-mirror:latest'], check=True)

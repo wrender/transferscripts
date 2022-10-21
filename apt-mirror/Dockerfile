@@ -4,10 +4,6 @@ RUN apt-get update -q \
   && \
     apt install -y -qq apt-mirror \
   && \
-    apt-get autoremove \
-  && \
-    rm -rf /var/cache/apt/* \
-  && \
     touch /var/log/cron.log \
   && \
     chmod u+x /opt/entrypoint.sh
