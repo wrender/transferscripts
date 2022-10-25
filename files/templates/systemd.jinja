@@ -1,0 +1,15 @@
+[Unit]
+Description=Transferbuddy Containers
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+User={{ cfg.systemduser }}
+Group={{ cfg.systemduser }}
+Restart=always
+ExecStart=/opt/transferbuddy/main.py
+ExecStop=/usr/bin/docker stop apt-mirror yum-mirror
+
+[Install]
+WantedBy=multi-user.target

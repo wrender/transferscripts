@@ -1,0 +1,9 @@
+
+{% for repo in yum.repos %}
+[{{ yum.repos[repo].repoid }}]
+name={{ yum.repos[repo].name }}
+baseurl={{ yum.repos[repo].baseurl }}
+gpgcheck={{ yum.repos[repo].gpgcheck }}
+enabled={{ yum.repos[repo].enabled }}
+
+{% endfor %}

@@ -1,14 +1,20 @@
+# Transferbuddy
+transferbuddy:
+  systemduser: 'root'
+  systemduid: '1000'
 
 # Skopeo Settings
 skopeo:
-  destination: "/tmp/wes/"
+  destination: "/tmp/containers/"
+  # How often to sync images in images.txt in minutes
+  frequency: 5
   image: "quay.io/skopeo/stable"
   dryrun: 'True'
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
 rsync:
-  sshuser: "wrender"
+  sshuser: "myuser"
   sshidentity: "~/.ssh/id_rsa"
   sshserver: "192.168.1.6"
   imagedestination: "/tmp/scopeo/"
@@ -17,9 +23,11 @@ rsync:
 # Ubuntu Repo Settings
 apt:
   # Destination to sync to
-  destination: "/tmp/ubuntu/mirror"
+  destination: "/tmp/mirror/ubuntu"
   # How often to sync in hours
   frequency: 12
+  # Sync on systemd service startup
+  onstartup: True
   # Settings for sync and repos. Default Ubuntu 20.04
   basepath: "/var/spool/apt-mirror"
   run_postmirror: '0'
@@ -37,8 +45,10 @@ apt:
 yum:
   # Destination to sync to
   destination: "/tmp/mirror/centos"
-  frequency: 12
   # How often to sync in hours
+  frequency: 12
+  # Sync on systemd service startup
+  onstartup: True
   repos:
     centos7-base:
       repoid: 'centos-7-base'

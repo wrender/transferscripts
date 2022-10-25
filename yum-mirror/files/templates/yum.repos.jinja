@@ -1,9 +1,0 @@
-
-{% for repo in repos %}
-[{{ repos[repo].repoid }}]
-name={{ repos[repo].name }}
-baseurl={{ repos[repo].baseurl }}
-gpgcheck={{ repos[repo].gpgcheck }}
-enabled={{ repos[repo].enabled }}
-
-{% endfor %}
