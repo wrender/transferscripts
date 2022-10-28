@@ -7,9 +7,9 @@ RUN apt-get update -q \
     touch /var/log/cron.log \
   && \
     chmod u+x /opt/entrypoint.sh
-RUN useradd -u 1000 -ms /bin/bash wrender
-RUN chown wrender /opt/entrypoint.sh
-USER wrender
+RUN useradd -u 1001 -ms /bin/bash transferbuddy
+RUN chown transferbuddy /opt/entrypoint.sh
+USER transferbuddy
 COPY ubuntu-mirror.list /etc/apt/mirror.list
 VOLUME ["/var/spool/apt-mirror"]
 ENTRYPOINT ["/opt/entrypoint.sh"]

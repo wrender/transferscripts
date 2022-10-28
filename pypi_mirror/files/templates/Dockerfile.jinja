@@ -1,0 +1,9 @@
+FROM pypa/bandersnatch
+RUN mkdir -p /mnt/repos/
+{% if transferbuddy.systemduser != 'root' -%}
+RUN useradd -u {{ transferbuddy.systemduid }} -ms /bin/bash {{ transferbuddy.systemduser }}
+RUN chown -R {{ transferbuddy.systemduser }} /mnt/repos
+USER {{ transferbuddy.systemduser }}
+{% endif -%}
+COPY bandersnatch.conf /conf/bandersnatch.conf
+VOLUME ["/mnt/repos"]

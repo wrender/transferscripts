@@ -9,7 +9,7 @@ User={{ cfg.systemduser }}
 Group={{ cfg.systemduser }}
 Restart=always
 ExecStart=/opt/transferbuddy/main.py
-ExecStop=/usr/bin/docker stop apt-mirror yum-mirror
+ExecStop=-/usr/bin/docker stop apt-mirror yum-mirror pypi-mirror container-mirror
 
 [Install]
 WantedBy=multi-user.target

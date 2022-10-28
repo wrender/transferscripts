@@ -8,6 +8,7 @@ DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used 
 - Runs on Linux Server in DMZ
 - apt-mirror, dnf, and skopeo sync the latest data from the internet
 - SQLlite local db to track previosuly skopeo synced container images so they are not downloaded again
+- Skopeo sync is limited to 100 anonymous pulls per day from docker hub
 - Scripts rsync data to secure location
 
 
@@ -21,4 +22,5 @@ DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used 
 - RSYNC,SSH
 - Docker
 - A user to run as
+- User is able to access docker.
 - SSH public/private keys for SSH destination

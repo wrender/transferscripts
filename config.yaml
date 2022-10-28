@@ -1,14 +1,15 @@
 # Transferbuddy
 transferbuddy:
-  systemduser: 'root'
-  systemduid: '1000'
+  systemduser: 'transferbuddy'
+  # UID must be 1001 or higher
+  systemduid: '1001'
 
 # Skopeo Settings
 skopeo:
-  destination: "/tmp/containers/"
+  # Local Destination to sync to
+  destination: "/tmp/mirror/containers/"
   # How often to sync images in images.txt in minutes
-  frequency: 5
-  image: "quay.io/skopeo/stable"
+  frequency: 6
   dryrun: 'True'
 
 # RSYNC - Script uses RSYNC over SSH to sync files
@@ -17,15 +18,15 @@ rsync:
   sshuser: "myuser"
   sshidentity: "~/.ssh/id_rsa"
   sshserver: "192.168.1.6"
-  imagedestination: "/tmp/scopeo/"
+  imagedestination: "/srv/mirror/"
   ubuntumirrordestination: "/tmp/mirror/ubuntu/"
 
 # Ubuntu Repo Settings
 apt:
-  # Destination to sync to
+  # Local Destination to sync to
   destination: "/tmp/mirror/ubuntu"
   # How often to sync in hours
-  frequency: 12
+  frequency: 5
   # Sync on systemd service startup
   onstartup: True
   # Settings for sync and repos. Default Ubuntu 20.04
@@ -34,22 +35,28 @@ apt:
   nthreads: "20"
   tilde: "0"
   repos:
-    - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
-    - 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main'
     - 'deb https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main'
+    - 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main'
+    - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
   clean: 'http://archive.ubuntu.com/ubuntu'
 
 # CentOS/RockyLinux Repo Settings
 yum:
-  # Destination to sync to
+  # Local Destination to sync to
   destination: "/tmp/mirror/centos"
   # How often to sync in hours
-  frequency: 12
+  frequency: 5
   # Sync on systemd service startup
   onstartup: True
   repos:
+    saltstack-redhat8:
+      repoid: 'saltstack-redhat8'
+      name: 'Saltstack Redhat 8'
+      baseurl: 'https://repo.saltproject.io/py3/redhat/8/x86_64/3004/'
+      gpgcheck: '0'
+      enabled: '1'
     centos7-base:
       repoid: 'centos-7-base'
       name: 'CentOS 7 Base'
@@ -67,4 +74,11 @@ yum:
       name: 'CentOS 7 Extras'
       baseurl: 'http://mirror.centos.org/centos/7/extras/x86_64/'
       gpgcheck: '0'
-      enabled: '1'    
+      enabled: '0'    
+
+# Pypi/Bandersnatch Mirror Settings
+pypi:
+  # Local Destination to sync to
+  destination: '/tmp/mirror/pypi'
+  frequency: 5
+  onstartup: True

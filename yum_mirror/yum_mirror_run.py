@@ -7,8 +7,10 @@ import logging
 with open('/opt/transferbuddy/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
 
-# Docker SDK
-def runyummirror():
+# Setup Module logger
+logger = logging.getLogger(__name__)
+
+def buildyummirror():
     from jinja2 import Environment, FileSystemLoader
     env = Environment(loader=FileSystemLoader('/opt/transferbuddy/yum_mirror/files/templates'))
     template = env.get_template('repos.jinja')
@@ -43,26 +45,34 @@ def runyummirror():
 
     # Build the container
     try:
-        print('Building the container...')
+        logger.info('Building the container for yum-mirror...')
+        print('Building the container for yum-mirror...')
         client = docker.from_env()
-        client.images.build(tag='yum-mirror:latest',path='/opt/transferbuddy/yum_mirror/files/')
-    except docker.errors.BuildError as e:
-        logging.error('There was an error building the image: ' + e )
-        print('There was an error building the image: ' + e )
+        client.images.build(tag='yum-mirror:latest',path='/opt/transferbuddy/yum_mirror/files/',rm=True)
+    except Exception as e:
+        logger.error('There was an error building the image.')
+        logger.error(e)
+        print('There was an error building the image.')
+        print(e)
     else:
         print('Built yum-image image successfully')
-        logging.info('Built yum-mirror image successfully')
+        logger.info('Built yum-mirror image successfully')
+
+# Docker SDK
+def runyummirror():
 
     # Try to run the container
     try:
         client = docker.from_env()
         client.containers.get('yum-mirror')
     except:
-        print('Trying to start container')
+        print('Starting container yum-mirror to sync any rpm repos...')
+        logger.info('Starting container yum-mirror to sync any rpm repos...')
         # If the systemd user is not root, create the directory as the other user.
         if cfg['transferbuddy']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
-        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos/', 'mode': 'rw'}},name='yum-mirror',auto_remove=True,detach=True,user=cfg['transferbuddy']['systemduser'])
+        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'}},name='yum-mirror',remove=True,detach=True,user=cfg['transferbuddy']['systemduser'])
+    else:
+        print('Container is running for yum-mirror. Nothing to do')
+        logger.info('Container is running for yum-mirror. Nothing to do')
 
-if cfg['yum']['onstartup'] == True:      
-    runyummirror()
