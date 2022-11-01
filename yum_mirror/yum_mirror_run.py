@@ -4,15 +4,15 @@ import subprocess
 import docker
 import logging
 
-with open('/opt/transferbuddy/config.yaml') as f:
+with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
 
-def buildyummirror():
+def setupyummirror():
     from jinja2 import Environment, FileSystemLoader
-    env = Environment(loader=FileSystemLoader('/opt/transferbuddy/yum_mirror/files/templates'))
+    env = Environment(loader=FileSystemLoader('/opt/mirrorsync/yum_mirror/files/templates'))
     template = env.get_template('repos.jinja')
     output_from_parsed_template = template.render(cfg)
     print('\n' + 'Mirrors that are defined in config.yaml file...')
@@ -20,43 +20,18 @@ def buildyummirror():
 
     # Create mirrors from config file
     print('Setting up mirrors to syncronize from config.yaml file...' + '\n')
-    with open("/opt/transferbuddy/yum_mirror/files/yum-mirrors.repo", "w") as fh:
+    with open("/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo", "w") as fh:
         fh.write(output_from_parsed_template)
 
-    # Configure Entrypoint file
-    env = Environment(loader=FileSystemLoader('/opt/transferbuddy/yum_mirror/files/templates'))
-    template = env.get_template('entrypoint.jinja')
+    # Configure RUN BASH Script
+    env = Environment(loader=FileSystemLoader('/opt/mirrorsync/yum_mirror/files/templates'))
+    template = env.get_template('rundnf.jinja')
     output_from_parsed_template = template.render(cfg)
     print(output_from_parsed_template)
 
-    # Create mirrors from config file
-    with open("/opt/transferbuddy/yum_mirror/files/entrypoint.sh", "w") as fh:
+    # Setup DNF Run script
+    with open("/opt/mirrorsync/yum_mirror/files/rundnf.sh", "w") as fh:
         fh.write(output_from_parsed_template)
-
-    # Create the Dockerfile
-    env = Environment(loader=FileSystemLoader('/opt/transferbuddy/yum_mirror/files/templates'))
-    template = env.get_template('Dockerfile.jinja')
-    output_from_parsed_template = template.render(cfg)
-    print(output_from_parsed_template)
-
-    # Create mirrors from config file
-    with open("/opt/transferbuddy/yum_mirror/files/Dockerfile", "w") as fh:
-        fh.write(output_from_parsed_template)
-
-    # Build the container
-    try:
-        logger.info('Building the container for yum-mirror...')
-        print('Building the container for yum-mirror...')
-        client = docker.from_env()
-        client.images.build(tag='yum-mirror:latest',path='/opt/transferbuddy/yum_mirror/files/',rm=True)
-    except Exception as e:
-        logger.error('There was an error building the image.')
-        logger.error(e)
-        print('There was an error building the image.')
-        print(e)
-    else:
-        print('Built yum-image image successfully')
-        logger.info('Built yum-mirror image successfully')
 
 # Docker SDK
 def runyummirror():
@@ -64,15 +39,18 @@ def runyummirror():
     # Try to run the container
     try:
         client = docker.from_env()
-        client.containers.get('yum-mirror')
-    except:
-        print('Starting container yum-mirror to sync any rpm repos...')
-        logger.info('Starting container yum-mirror to sync any rpm repos...')
         # If the systemd user is not root, create the directory as the other user.
-        if cfg['transferbuddy']['systemduser'] != 'root':
+        if cfg['mirrorsync']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
-        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'}},name='yum-mirror',remove=True,detach=True,user=cfg['transferbuddy']['systemduser'])
+        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,detach=True,user=cfg['mirrorsync']['systemduser'])
+    
+    except Exception as e:
+        logger.error('There was an error running the image.')
+        logger.error(e)
+        print('There was an error running the image.')
+        print(e)
+
     else:
-        print('Container is running for yum-mirror. Nothing to do')
-        logger.info('Container is running for yum-mirror. Nothing to do')
+        print('Container is running for yum-mirror.')
+        logger.info('Container is running yum apt-mirror.')
 

@@ -1,9 +1,10 @@
 FROM pypa/bandersnatch
 RUN mkdir -p /mnt/repos/
-{% if transferbuddy.systemduser != 'root' -%}
-RUN useradd -u {{ transferbuddy.systemduid }} -ms /bin/bash {{ transferbuddy.systemduser }}
-RUN chown -R {{ transferbuddy.systemduser }} /mnt/repos
-USER {{ transferbuddy.systemduser }}
+{% if mirrorsync.systemduser != 'root' -%}
+RUN useradd -u {{ mirrorsync.systemduid }} -ms /bin/bash {{ mirrorsync.systemduser }}
+RUN chown -R {{ mirrorsync.systemduser }} /mnt/repos
+RUN chown -R {{ mirrorsync.systemduser }} /bandersnatch
+USER {{ mirrorsync.systemduser }}
 {% endif -%}
-COPY bandersnatch.conf /conf/bandersnatch.conf
 VOLUME ["/mnt/repos"]
+CMD ["bandersnatch","-c", "/conf/bandersnatch.conf","mirror"]

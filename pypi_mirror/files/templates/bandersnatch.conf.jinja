@@ -20,7 +20,7 @@ master = https://pypi.org
 ; somewhat aggressively low value: rather fail quickly temporarily and re-run
 ; the client soon instead of having a process hang infinitely and have TCP not
 ; catching up for ages.
-timeout = 10
+timeout = {{ pypi.timeout }}
 
 ; The global-timeout sets aiohttp total timeout for it's coroutines
 ; This is set incredibly high by default as aiohttp coroutines need to be
@@ -115,3 +115,41 @@ compare-method = hash
 ; be appended to the filename (i.e. /path/to/diff-1568129735)
 ; diff-file = /srv/pypi/mirrored-files
 ; diff-append-epoch = true
+
+{% if pypi.plugins is defined -%}
+[plugins]
+enabled =
+{% for plugin in pypi.plugins -%}
+{{ plugin|indent(4,true) }}
+{% endfor -%}
+{% endif -%}
+
+{% if pypi.latestreleasekeep is defined %}
+[latest_release]
+keep = {{ pypi.latestreleasekeep }}
+{% endif -%}
+
+{% if pypi.allowlist is defined %}
+[allowlist]
+{% if pypi.allowlist.packages is defined -%}
+packages =
+{% for package in pypi.allowlist.packages -%}
+{{ package|indent(4,true) }}
+{% endfor -%}
+{% endif -%}
+{% endif -%}
+
+{% if pypi.blocklist is defined %}
+[blocklist]
+{% if pypi.blocklist.platforms is defined -%}
+platforms =
+{% for platform in pypi.blocklist.platforms -%}
+{{ platform|indent(4,true) }}
+{% endfor -%}
+{% endif -%}
+{% endif -%}
+
+{% if pypi.maxpackagesize is defined %}
+[size_project_metadata]
+max_package_size = {{ pypi.maxpackagesize }}
+{% endif %}

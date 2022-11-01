@@ -1,3 +1,2 @@
-busybox
 rancher/aks-operator:v1.0.6
 rancher/backup-restore-operator:v2.1.3

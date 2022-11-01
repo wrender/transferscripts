@@ -1,16 +1,18 @@
-# Transferbuddy
-transferbuddy:
-  systemduser: 'transferbuddy'
+# mirrorsync
+mirrorsync:
+  # Changing user or UID requires manual rerun of setup.py after
+  systemduser: 'mirrorsync'
   # UID must be 1001 or higher
   systemduid: '1001'
 
 # Skopeo Settings
 skopeo:
   # Local Destination to sync to
-  destination: "/tmp/mirror/containers/"
-  # How often to sync images in images.txt in minutes
-  frequency: 6
-  dryrun: 'True'
+  destination: "/tmp/mirrors/containers/"
+  # How often to sync images in images.txt in minutes. Scopeo runs
+  # continiously and checks at this interval for new images to pull from images.txt.
+  frequency: '1'
+  dryrun: True
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
@@ -18,17 +20,17 @@ rsync:
   sshuser: "myuser"
   sshidentity: "~/.ssh/id_rsa"
   sshserver: "192.168.1.6"
-  imagedestination: "/srv/mirror/"
-  ubuntumirrordestination: "/tmp/mirror/ubuntu/"
 
 # Ubuntu Repo Settings
 apt:
   # Local Destination to sync to
-  destination: "/tmp/mirror/ubuntu"
-  # How often to sync in hours
-  frequency: 5
+  destination: "/tmp/mirrors/ubuntu"
+  # How often to sync in hours. Leave blank to disable.
+  frequency: ''
+  # Time of day to run a sync
+  timeofday: '02:00'
   # Sync on systemd service startup
-  onstartup: True
+  onstartup: False
   # Settings for sync and repos. Default Ubuntu 20.04
   basepath: "/var/spool/apt-mirror"
   run_postmirror: '0'
@@ -37,7 +39,7 @@ apt:
   repos:
     - 'deb https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main'
     - 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main'
-    - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
+    #- 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
   clean: 'http://archive.ubuntu.com/ubuntu'
@@ -45,11 +47,12 @@ apt:
 # CentOS/RockyLinux Repo Settings
 yum:
   # Local Destination to sync to
-  destination: "/tmp/mirror/centos"
-  # How often to sync in hours
-  frequency: 5
+  destination: "/tmp/mirrors/centos"
+  # How often to sync in hours. Leave blank to disable.
+  frequency: ''
+  timeofday: '01:30'
   # Sync on systemd service startup
-  onstartup: True
+  onstartup: False
   repos:
     saltstack-redhat8:
       repoid: 'saltstack-redhat8'
@@ -68,7 +71,7 @@ yum:
       name: 'CentOS 7 Updates'
       baseurl: 'http://mirror.centos.org/centos/7/updates/x86_64/'
       gpgcheck: '0'
-      enabled: '1'   
+      enabled: '0'   
     centos7-extras:
       repoid: 'centos-7-extras'
       name: 'CentOS 7 Extras'
@@ -79,6 +82,36 @@ yum:
 # Pypi/Bandersnatch Mirror Settings
 pypi:
   # Local Destination to sync to
-  destination: '/tmp/mirror/pypi'
-  frequency: 5
-  onstartup: True
+  destination: '/tmp/mirrors/pypi'
+  # How often to run in hours. Leave blank to disable.
+  frequency: ''
+  # Time of day to run a sync
+  timeofday: '21:35'
+  onstartup: False
+  timeout: '30'
+  plugins:
+    - exclude_platform
+    - allowlist_project
+    - size_project_metadata
+    - latest_release
+    - prerelease_release
+  # How many releases to keep
+  latestreleasekeep: '1'
+
+  # Don't download these packages
+  blocklist:
+    platforms:
+      - windows
+      - macos
+      - freebsd
+      - py2.4
+      - py2.5
+      - py2.6
+      - py2.7
+    packages:  
+      - tf-nightly-gpu
+      - tensorflow-gpu
+  # Max Package Size to Sync. A package on allowlist overrides this.
+  maxpackagesize: '1M'
+
+

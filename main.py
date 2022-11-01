@@ -3,13 +3,15 @@ import logging
 import yaml
 import schedule, time
 
+
+
 # Get Configuration Values
-with open('/opt/transferbuddy/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+with open('/opt/mirrorsync/config.yaml') as f:
+    cfg = yaml.safe_load(f)
 
 def main():
     logger = logging.getLogger()
-    fhandler = logging.FileHandler(filename='/opt/transferbuddy/transferbuddy.log', mode='a')
+    fhandler = logging.FileHandler(filename='/opt/mirrorsync/mirrorsync.log', mode='a')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fhandler.setFormatter(formatter)
     logger.addHandler(fhandler)
@@ -17,22 +19,20 @@ def main():
     
     from threading import Thread
     
+    from apt_mirror.apt_mirror_run import setupaptmirror
     from apt_mirror.apt_mirror_run import runaptmirror
-    from apt_mirror.apt_mirror_run import buildaptmirror
     from yum_mirror.yum_mirror_run import runyummirror
-    from yum_mirror.yum_mirror_run import buildyummirror
+    from yum_mirror.yum_mirror_run import setupyummirror
     from container_mirror.container_mirror_run import runcontainermirror
-    from container_mirror.container_mirror_run import buildcontainermirror
+    from pypi_mirror.pypi_mirror_run import setuppypimirror
     from pypi_mirror.pypi_mirror_run import runpypimirror
-    from pypi_mirror.pypi_mirror_run import buildpypimirror
 
     # Build the custom mirror images on startup
-    print('Building different container image components...')
-    logger.info('Building different container image components...')
-    buildaptmirror()
-    buildyummirror()
-    buildcontainermirror()
-    buildpypimirror()
+    print('Setting up different container file components...')
+    logger.info('Setting up different container file components...')
+    setupaptmirror()
+    setupyummirror()
+    setuppypimirror()
 
     # Define different modules as different threads
     def callaptmirror():
@@ -51,17 +51,24 @@ def main():
     if cfg['apt']['onstartup'] == True:
         callaptmirror()
 
-    if cfg['apt']['onstartup'] == True:      
+    if cfg['yum']['onstartup'] == True:      
         callyummirror()
 
     if cfg['pypi']['onstartup'] == True:      
         callpypimirror()
 
+    # Function to check and call hourly or at a specific daily time
+    def scheduletocall(mirror,frequency,timeofday: str=None):
+        if timeofday is not None and len(timeofday) != 0:
+            schedule.every().day.at(str(timeofday)).do(mirror)
+        if frequency is not None and len(frequency) != 0:
+            schedule.every(int(frequency)).minutes.do(mirror)
+
     # Schedule to call various module runs at different times
-    schedule.every(cfg['apt']['frequency']).minutes.do(callaptmirror)
-    schedule.every(cfg['yum']['frequency']).minutes.do(callyummirror)
-    schedule.every(cfg['skopeo']['frequency']).seconds.do(callcontainermirror)
-    schedule.every(cfg['pypi']['frequency']).minutes.do(callpypimirror)
+    scheduletocall(mirror=callaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
+    scheduletocall(mirror=callyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
+    scheduletocall(mirror=callcontainermirror,frequency=cfg['skopeo']['frequency'])
+    scheduletocall(mirror=callpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
 
     # Loop so that the scheduling task
     # keeps on running all time.

@@ -1,17 +1,12 @@
 FROM rockylinux:9.0
-COPY entrypoint.sh /opt/entrypoint.sh
 RUN dnf install -y yum-utils \
   && \
     rm -rf /etc/yum.repos.d/* \
   && \
-    mkdir -p /mnt/repos \
-  && \
-    chmod u+x /opt/entrypoint.sh
-{% if transferbuddy.systemduser != 'root' -%}
-RUN useradd -u {{ transferbuddy.systemduid }} -ms /bin/bash {{ transferbuddy.systemduser }}
-RUN chown {{ transferbuddy.systemduser }} /opt/entrypoint.sh
-USER {{ transferbuddy.systemduser }}
+    mkdir -p /mnt/repos
+{% if mirrorsync.systemduser != 'root' -%}
+RUN useradd -u {{ mirrorsync.systemduid }} -ms /bin/bash {{ mirrorsync.systemduser }}
+USER {{ mirrorsync.systemduser }}
 {% endif -%}
-COPY yum-mirrors.repo /etc/yum.repos.d/mirrors.repo
 VOLUME ["/mnt/repos"]
-ENTRYPOINT ["/opt/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash","/opt/rundnf.sh"]

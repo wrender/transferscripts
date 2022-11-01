@@ -1,6 +1,6 @@
 FROM quay.io/skopeo/stable:latest
-{% if transferbuddy.systemduser != 'root' -%}
-RUN useradd -u {{ transferbuddy.systemduid }} {{ transferbuddy.systemduser }}
-USER {{ transferbuddy.systemduser }}
+{% if mirrorsync.systemduser != 'root' -%}
+RUN useradd -u {{ mirrorsync.systemduid }} {{ mirrorsync.systemduser }}
+USER {{ mirrorsync.systemduser }}
 {% endif -%}
 VOLUME ["/var/spool/apt-mirror"]

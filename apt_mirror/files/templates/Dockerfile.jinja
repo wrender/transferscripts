@@ -1,17 +1,12 @@
 FROM ubuntu:20.04
-COPY entrypoint.sh /opt/entrypoint.sh
 RUN apt-get update -q \
   && \
     apt install -y -qq apt-mirror \
   && \
-    touch /var/log/cron.log \
-  && \
-    chmod u+x /opt/entrypoint.sh
-{% if transferbuddy.systemduser != 'root' -%}
-RUN useradd -u {{ transferbuddy.systemduid }} -ms /bin/bash {{ transferbuddy.systemduser }}
-RUN chown {{ transferbuddy.systemduser }} /opt/entrypoint.sh
-USER {{ transferbuddy.systemduser }}
+    touch /var/log/cron.log
+{% if mirrorsync.systemduser != 'root' -%}
+RUN useradd -u {{ mirrorsync.systemduid }} -ms /bin/bash {{ mirrorsync.systemduser }}
+USER {{ mirrorsync.systemduser }}
 {% endif -%}
-COPY ubuntu-mirror.list /etc/apt/mirror.list
 VOLUME ["/var/spool/apt-mirror"]
-ENTRYPOINT ["/opt/entrypoint.sh"]
+CMD ["apt-mirror"]
