@@ -6,6 +6,8 @@ import socket
 import json
 import docker
 import yaml
+import psutil
+import os
 
 
 # Get Configuration Values
@@ -27,9 +29,6 @@ host = socket.gethostname() # Get local machine name
 port = 2236                 # Reserve a port for your service.
 s.bind((host, port))        # Bind to the port
 
-
-if cfg['mirrorsync']['systemduser'] != 'root':
-            subprocess.run(['mkdir','-p',cfg['skopeo']['destination']], check=True)
 
 # Function to run skopeo
 def skopeosubprocess(dockerimage):
@@ -72,7 +71,55 @@ def checkdbandsync(itemname):
         logger.info('Image already synced: ' + itemname)
         print('Image already synced: ' + itemname)
 
+
+# Function to check for pid file
+def checkforpid(pidfile):
+
+   # Check if path exists
+    if os.path.isfile(pidfile):
+        openpidfile = open(pidfile, "r")
+        pidline = openpidfile.readline()
+        pid = int(pidline)
+        print(pid)
+        openpidfile.close()
+
+        # Check for running pid
+        if psutil.pid_exists(pid):
+            print("a process with pid %d exists" % pid)
+            logger.info("Not going to run again now. A process with pid %d exists" % pid)
+            return True
+        else:
+            print("Process with pid %d does not exist" % pid)
+            logger.info("Process with pid %d does not exist" % pid)
+            return False
+
+    # Return false if no pid file
+    else:
+        return False
+
+
+# Function to rsync data from container mirror to ssh destination
+def rsynccontainermirror():
+
+    subprocess.call(['rsync',
+    '--remove-source-files',
+    '-avz',
+    '-e',
+    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+    cfg['skopeo']['destination'],
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
+
+    subprocess.call(['find',cfg['skopeo']['destination'] + '/','-empty','-delete'])
+
+
+
 def runcontainermirror():
+
+    if cfg['mirrorsync']['systemduser'] != 'root':
+            subprocess.run(['mkdir','-p',cfg['skopeo']['destination']], check=True)
+
+    logger.info('Checking for images in /opt/mirrorsync/container_mirror/images.txt...')
+
     # Using readlines() to iterate through list of repositories. 
     with open('/opt/mirrorsync/container_mirror/images.txt', 'r+') as f:
         alist = [line.rstrip() for line in f]
@@ -109,4 +156,5 @@ def runcontainermirror():
         else:
             checkdbandsync(line)
 
-    logger.info('Checking for images in /opt/mirrorsync/container_mirror/images.txt...')
+    # Run function to syncronize containers to destination
+    rsynccontainermirror()

@@ -1,7 +1,7 @@
 # mirrorsync
 mirrorsync:
   # Changing user or UID requires manual rerun of setup.py after
-  systemduser: 'mirrorsync'
+  systemduser: 'transferbuddy'
   # UID must be 1001 or higher
   systemduid: '1001'
 
@@ -12,13 +12,16 @@ skopeo:
   # How often to sync images in images.txt in minutes. Scopeo runs
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
-  dryrun: True
+  dryrun: False
+  # How often to rsync images to SSH destination in minutes
+  rsyncfrequency: '1'
+  rsyncdestination: "/tmp/rsynced/mirrors/containers/"
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
 rsync:
-  sshuser: "myuser"
-  sshidentity: "~/.ssh/id_rsa"
+  sshuser: "wrender"
+  sshidentity: "/home/transferbuddy/.ssh/id_rsa"
   sshserver: "192.168.1.6"
 
 # Ubuntu Repo Settings
