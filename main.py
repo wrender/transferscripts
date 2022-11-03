@@ -52,15 +52,7 @@ if cfg['pypi']['onstartup'] == True:
     runpypimirror()
 
 def main():
-    return
-       
 
-
-
-
-
-
-def scheduling():
     # Setup scheduling/threading
     def run_continuously(interval=1):
         """Continuously run, while executing pending jobs at each
@@ -101,7 +93,7 @@ def scheduling():
 
     # Start the background thread
     run_continuously()
+       
 
 if __name__ == '__main__':
     main()
-    scheduling()

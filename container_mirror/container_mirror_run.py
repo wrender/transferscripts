@@ -20,20 +20,13 @@ logger = logging.getLogger(__name__)
 # Setup SQLITE Database
 connection = sqlite3.connect('/opt/mirrorsync/container_mirror/transferred-containers.db', check_same_thread=False)
 cursor = connection.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS transferred (name TEXT,skopeosynced INTEGER)")
+cursor.execute("CREATE TABLE IF NOT EXISTS transferred (name TEXT,digest TEXT)")
 cursor.close()
-
-# Bind to a socket port to make sure script only runs once.
-s = socket.socket()         # Create a socket object
-host = socket.gethostname() # Get local machine name
-port = 2236                 # Reserve a port for your service.
-s.bind((host, port))        # Bind to the port
 
 
 # Function to run skopeo
-def skopeosubprocess(dockerimage):
+def skopeosync(dockerimage):
 
-    print(dockerimage)
     if cfg['skopeo']['dryrun'] == True:
         skopeocmd = ['sync','--keep-going','--dry-run','--scoped','--src','docker','--dest', 'dir', dockerimage,'/var/lib/containers/storage']
     else:
@@ -41,62 +34,68 @@ def skopeosubprocess(dockerimage):
      
     # Try to get image with scopeo
     try:
-        client = docker.from_env()
-        print(skopeocmd)
-        result = client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
+        imagedigest = getimagedigest(dockerimage)
+        # Call function to check local database for image
+        if checkdb(imagedigest) == True:
+            print('Skopeo Sync: Image already synced - ' + dockerimage + ' ' + imagedigest)
+            logging.info('Skopeo Sync: Image already synced - ' + dockerimage + ' ' + imagedigest)
+        else:
+            # Try syncing the image
+            print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
+            logging.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
+            client = docker.from_env()
+            client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
+
+            # Write image name, and digest to database so it is not downloaded again.
+            writedb(dockerimage, imagedigest)
+
+            # Run function to syncronize container to destination
+            rsynccontainermirror()
+
+            return True
+
     except Exception as e:
-        logger.error('There was an error with the skopeo sync')
+        logger.error('Skopeo Sync: There was an error with the skopeo sync')
         logger.error(e)
-        print('There was an error with the skopeo sync')
+        print('Skopeo Sync: There was an error with the skopeo sync')
         print(e)
     
-    return result
+
+# Function to inspect images
+def getimagedigest(name):
+    skopeoinspectcmd = ['inspect','docker://' + name ]
+    try:
+        client = docker.from_env()
+        result = client.containers.run('container-mirror:latest',command=skopeoinspectcmd,remove=True)
+        jsonresult = json.loads(result)
+        imagedigest = jsonresult['Digest']
+    except:
+        logger.error('Could not get digest of image')
+    
+    return imagedigest
+
 
 # Function to check database if item has been synced before 
 # If it has not call skopeo sync function
-def checkdbandsync(itemname):
+def checkdb(digest):
     cursor = connection.cursor()
-    cursor.execute("SELECT name, skopeosynced FROM transferred WHERE name = ?", (itemname,))
+    cursor.execute("SELECT name, digest FROM transferred WHERE digest = ?", (digest,))
     data=cursor.fetchone()
+    cursor.close()
     if data is None:
-        logger.info('New item. Calling Skopeo Sync for %s'%itemname)
-        # Call Skopeo Sync Function
-        skopeosubprocess(itemname)
-        
-        # Insert this image and tag into database to track
-        cursor.execute("INSERT INTO transferred (name, skopeosynced) VALUES (?, ?)",(itemname, '1'))
-        connection.commit()
-        cursor.close()
-    else:
-        logger.info('Image already synced: ' + itemname)
-        print('Image already synced: ' + itemname)
-
-
-# Function to check for pid file
-def checkforpid(pidfile):
-
-   # Check if path exists
-    if os.path.isfile(pidfile):
-        openpidfile = open(pidfile, "r")
-        pidline = openpidfile.readline()
-        pid = int(pidline)
-        print(pid)
-        openpidfile.close()
-
-        # Check for running pid
-        if psutil.pid_exists(pid):
-            print("a process with pid %d exists" % pid)
-            logger.info("Not going to run again now. A process with pid %d exists" % pid)
-            return True
-        else:
-            print("Process with pid %d does not exist" % pid)
-            logger.info("Process with pid %d does not exist" % pid)
-            return False
-
-    # Return false if no pid file
-    else:
         return False
+    else:
+        return True
 
+# Function to write name and digest to database
+def writedb(name, digest):
+    # Insert this image and tag into database to track
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO transferred (name, digest) VALUES (?, ?)",(name, digest))
+    connection.commit()
+    cursor.close()
+
+    return
 
 # Function to rsync data from container mirror to ssh destination
 def rsynccontainermirror():
@@ -109,8 +108,9 @@ def rsynccontainermirror():
     cfg['skopeo']['destination'],
     cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
-    subprocess.call(['find',cfg['skopeo']['destination'] + '/','-empty','-delete'])
 
+    # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
+    subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
 
 
 def runcontainermirror():
@@ -123,15 +123,15 @@ def runcontainermirror():
     # Using readlines() to iterate through list of repositories. 
     with open('/opt/mirrorsync/container_mirror/images.txt', 'r+') as f:
         alist = [line.rstrip() for line in f]
-        f.truncate(0)
+        #f.truncate(0)
 
     # For each container image name in the file list images.txt
     for line in alist:
         
         # Check if colon is not in line item. As skopeo will download all tags in this case.
         if ':' not in line:
-            logger.info('There is no tag. Checking for available tags...')
-            print('There is no tag. Checking for available tags...')
+            logger.info('Skopeo Sync: There is no tag. Checking for available tags...')
+            print('Skopeo Sync: There is no tag. Checking for available tags...')
             skopeolisttagscmd = ['list-tags','docker://' + line ]
 
             # Run skopeo list tags to get all tags for image
@@ -143,18 +143,17 @@ def runcontainermirror():
                 # Loop through each image tag and skopep sync it
                 for item in jsonresult['Tags']:
                     newitemwithtag = (line + ':' + item)
-                    checkdbandsync(newitemwithtag)
+                    skopeosync(newitemwithtag)
                     
             except Exception as e:
-                logger.error('There was an error with the skopeo sync')
+                logger.error('Skopeo Sync: There was an error with the skopeo sync')
                 logger.error(e)
-                print('There was an error with the skopeo sync')
+                print('Skopeo Sync: There was an error with the skopeo sync')
                 print(e)
 
 
         # Don't loop and just try and skopeo sync the single image  
         else:
-            checkdbandsync(line)
+            skopeosync(line)
 
-    # Run function to syncronize containers to destination
-    rsynccontainermirror()
+runcontainermirror()

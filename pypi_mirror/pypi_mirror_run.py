@@ -16,7 +16,6 @@ def setuppypimirror():
     template = env.get_template('bandersnatch.conf.jinja')
     output_from_parsed_template = template.render(cfg)
     print('\n' + 'Mirrors that are defined in config.yaml file...')
-    print(output_from_parsed_template)
 
     # Create mirrors from config file
     print('Setting up mirrors to syncronize from config.yaml file...' + '\n')
