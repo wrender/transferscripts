@@ -25,13 +25,15 @@ rsync:
 # Ubuntu Repo Settings
 apt:
   # Local Destination to sync to
-  destination: "/tmp/mirrors/ubuntu"
-  # How often to sync in hours. Leave blank to disable.
-  frequency: ''
+  destination: "/tmp/mirrors/apt"
+  # Remote server path to rsync to
+  rsyncdestination: "/tmp/rsynced/mirrors/apt/"
+  # How often to sync in minutes. Leave blank to disable.
+  frequency: '5'
   # Time of day to run a sync
   timeofday: '02:00'
   # Sync on systemd service startup
-  onstartup: False
+  onstartup: True
   # Settings for sync and repos. Default Ubuntu 20.04
   basepath: "/var/spool/apt-mirror"
   run_postmirror: '0'
@@ -40,7 +42,7 @@ apt:
   repos:
     - 'deb https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main'
     - 'deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main'
-    #- 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
+    - 'deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-security main restricted universe multiverse'
     #- 'deb http://archive.ubuntu.com/ubuntu focal-updates main restricted universe multiverse'
   clean: 'http://archive.ubuntu.com/ubuntu'
@@ -49,8 +51,10 @@ apt:
 yum:
   # Local Destination to sync to
   destination: "/tmp/mirrors/centos"
+  # Remote server path to rsync to
+  rsyncdestination: "/tmp/rsynced/mirrors/yum/"
   # How often to sync in hours. Leave blank to disable.
-  frequency: ''
+  frequency: '4'
   timeofday: '01:30'
   # Sync on systemd service startup
   onstartup: False
@@ -78,12 +82,14 @@ yum:
       name: 'CentOS 7 Extras'
       baseurl: 'http://mirror.centos.org/centos/7/extras/x86_64/'
       gpgcheck: '0'
-      enabled: '0'    
+      enabled: '0'  
 
 # Pypi/Bandersnatch Mirror Settings
 pypi:
   # Local Destination to sync to
   destination: '/tmp/mirrors/pypi'
+  # Remote server path to rsync to
+  rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
   # How often to run in hours. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync

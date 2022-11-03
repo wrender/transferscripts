@@ -22,7 +22,18 @@ def setuppypimirror():
     with open("/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf", "w") as fh:
         fh.write(output_from_parsed_template)
 
-# Docker SDK
+# Function to rsync data from container mirror to ssh destination
+def rsyncpypimirror():
+
+    subprocess.call(['rsync',
+    '-avz',
+    '--delete',
+    '-e',
+    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+    cfg['pypi']['destination'],
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsyncdestination']])
+
+# Main pypi mirror function
 def runpypimirror():
 
     # Try to run the container
@@ -31,7 +42,9 @@ def runpypimirror():
         # If the systemd user is not root, create the directory as the other user.
         if cfg['mirrorsync']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['pypi']['destination']], check=True)
-        client.containers.run('pypi-mirror',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,detach=True,user=cfg['mirrorsync']['systemduser'])
+        client.containers.run('pypi-mirror',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+        # Call rsync
+        rsyncpypimirror()
 
     except Exception as e:
         logger.error('There was an error running the image.')

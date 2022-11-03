@@ -38,11 +38,11 @@ def skopeosync(dockerimage):
         # Call function to check local database for image
         if checkdb(imagedigest) == True:
             print('Skopeo Sync: Image already synced - ' + dockerimage + ' ' + imagedigest)
-            logging.info('Skopeo Sync: Image already synced - ' + dockerimage + ' ' + imagedigest)
+            logger.info('Skopeo Sync: Image already synced - ' + dockerimage + ' ' + imagedigest)
         else:
             # Try syncing the image
             print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
-            logging.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
+            logger.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             client = docker.from_env()
             client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
 
@@ -123,7 +123,7 @@ def runcontainermirror():
     # Using readlines() to iterate through list of repositories. 
     with open('/opt/mirrorsync/container_mirror/images.txt', 'r+') as f:
         alist = [line.rstrip() for line in f]
-        #f.truncate(0)
+        f.truncate(0)
 
     # For each container image name in the file list images.txt
     for line in alist:

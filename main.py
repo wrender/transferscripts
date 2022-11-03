@@ -32,15 +32,6 @@ setupaptmirror()
 setupyummirror()
 setuppypimirror()
 
-# If modules are set to run on startup run them right away
-if cfg['apt']['onstartup'] == True:
-    runaptmirror()
-
-if cfg['yum']['onstartup'] == True:      
-    runyummirror()
-
-if cfg['pypi']['onstartup'] == True:      
-    runpypimirror()
 
 def main():
 
@@ -84,7 +75,16 @@ def main():
 
     # Start the background thread
     run_continuously()
-       
+
+    # If modules are set to run on startup run them right away
+    if cfg['apt']['onstartup'] == True:
+        runaptmirror()
+
+    if cfg['yum']['onstartup'] == True:      
+        runyummirror()
+
+    if cfg['pypi']['onstartup'] == True:      
+        runpypimirror()   
 
 if __name__ == '__main__':
     main()

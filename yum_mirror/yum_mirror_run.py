@@ -33,7 +33,18 @@ def setupyummirror():
     with open("/opt/mirrorsync/yum_mirror/files/rundnf.sh", "w") as fh:
         fh.write(output_from_parsed_template)
 
-# Docker SDK
+# Function to rsync data from container mirror to ssh destination
+def rsyncyummirror():
+
+    subprocess.call(['rsync',
+    '-avz',
+    '--delete',
+    '-e',
+    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+    cfg['yum']['destination'],
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['yum']['rsyncdestination']])
+
+# Main function to run yum mirror
 def runyummirror():
 
     # Try to run the container
@@ -42,8 +53,10 @@ def runyummirror():
         # If the systemd user is not root, create the directory as the other user.
         if cfg['mirrorsync']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
-        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,detach=True,user=cfg['mirrorsync']['systemduser'])
-    
+        client.containers.run('yum-mirror',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+        # Call rsync
+        rsyncyummirror()
+   
     except Exception as e:
         logger.error('There was an error running the image.')
         logger.error(e)

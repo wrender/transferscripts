@@ -22,6 +22,17 @@ def setupaptmirror():
     with open("/opt/mirrorsync/apt_mirror/files/apt-mirror.list", "w") as fh:
         fh.write(output_from_parsed_template)
 
+# Function to rsync data from container mirror to ssh destination
+def rsyncaptmirror():
+
+    subprocess.call(['rsync',
+    '-avz',
+    '--delete',
+    '-e',
+    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+    cfg['apt']['destination'],
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['apt']['rsyncdestination']])
+
 def runaptmirror():
 
     # Start the container if it is not running
@@ -30,8 +41,10 @@ def runaptmirror():
         # If the systemd user is not root, create the directory as the other user.
         if cfg['mirrorsync']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['apt']['destination']], check=True)
-        client.containers.run('apt-mirror',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,detach=True,user=cfg['mirrorsync']['systemduser'])
-        
+        client.containers.run('apt-mirror',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+        # Call rsync
+        rsyncaptmirror()
+
     except Exception as e:
         logger.error('There was an error running the image.')
         logger.error(e)
