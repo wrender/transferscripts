@@ -1,0 +1,14 @@
+[Unit]
+Description=syncregistry application
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+User={{ cfg.systemduser }}
+Group={{ cfg.systemduser }}
+Restart=always
+ExecStart=/opt/sync_registry/main.py
+
+[Install]
+WantedBy=multi-user.target

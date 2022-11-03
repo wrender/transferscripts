@@ -1,0 +1,11 @@
+sync_registry:
+  # Changing user or UID requires manual rerun of setup.py after
+  systemduser: 'transferbuddy'
+  # UID must be 1001 or higher
+  systemduid: '1001'
+
+  skopeo:
+    dest-tls-verify: False
+    source: "/tmp/mycontainers/"
+    destination: "localhost:5000"
+    

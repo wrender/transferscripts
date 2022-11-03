@@ -41,7 +41,7 @@ def runaptmirror():
         # If the systemd user is not root, create the directory as the other user.
         if cfg['mirrorsync']['systemduser'] != 'root':
             subprocess.run(['mkdir','-p',cfg['apt']['destination']], check=True)
-        client.containers.run('apt-mirror',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+        client.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
         # Call rsync
         rsyncaptmirror()
 

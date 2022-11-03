@@ -1,0 +1,6 @@
+FROM quay.io/skopeo/stable:v1.10
+{% if sync_registry.systemduser != 'root' -%}
+RUN useradd -u {{ sync_registry.systemduid }} {{ sync_registry.systemduser }}
+USER {{ sync_registry.systemduser }}
+{% endif -%}
+VOLUME ["/var/spool/apt-mirror"]

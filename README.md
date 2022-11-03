@@ -1,6 +1,6 @@
 # mirrorsync
 
-A simple set of scripts to automate the syncronization of various public repositories like apt, yum, docker images.
+A simple set of scripts to automate the syncronization of various public repositories like apt, yum, pypi, & docker images.
 DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used for docker images, bandersnatch is used for Pypi.
 
 ## How it works
@@ -27,6 +27,7 @@ DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used 
 ## Installation & Usage
 1. Git clone the project to /opt/mirrorsync/
 2. Edit the configuration of /opt/mirrorsync/config.yaml to suit your needs
-3. Run setup: /opt/mirrosync/setup.py
-4. Run the service:  systemctl start mirrorsync
-5. Watch the log at: /opt/mirrorsync/mirrorsync.log
+3. Setup destination directories
+4. Run setup: `sudo /opt/mirrosync/setup.py`
+5. Run the service:  systemctl start mirrorsync
+6. Watch the log at: /opt/mirrorsync/mirrorsync.log
