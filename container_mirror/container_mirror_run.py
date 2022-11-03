@@ -76,7 +76,6 @@ def getimagedigest(name):
 
 
 # Function to check database if item has been synced before 
-# If it has not call skopeo sync function
 def checkdb(digest):
     cursor = connection.cursor()
     cursor.execute("SELECT name, digest FROM transferred WHERE digest = ?", (digest,))
@@ -113,6 +112,7 @@ def rsynccontainermirror():
     subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
 
 
+# Main function for running this module
 def runcontainermirror():
 
     if cfg['mirrorsync']['systemduser'] != 'root':
