@@ -2,7 +2,6 @@
 import logging
 import yaml
 import schedule, time
-import os
 import threading
 
 # Import different modules
@@ -32,14 +31,6 @@ logger.info('Setting up different container file components...')
 setupaptmirror()
 setupyummirror()
 setuppypimirror()
-
-# Setup pid folder
-pidpath = '/tmp/mirrorsync'
-isExist = os.path.exists(pidpath)
-if not isExist:
-    # Create a new directory because it does not exist
-    os.makedirs(pidpath)
-
 
 # If modules are set to run on startup run them right away
 if cfg['apt']['onstartup'] == True:
