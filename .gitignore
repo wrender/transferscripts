@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+container_mirror/transferred-containers.db
+
 # Distribution / packaging
 bin/
 build/

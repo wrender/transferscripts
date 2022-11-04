@@ -44,7 +44,7 @@ def skopeosync(dockerimage):
             print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             logger.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             client = docker.from_env()
-            client.containers.run('container-mirror:v1.0',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
+            client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
 
             # Write image name, and digest to database so it is not downloaded again.
             writedb(dockerimage, imagedigest)
@@ -66,7 +66,7 @@ def getimagedigest(name):
     skopeoinspectcmd = ['inspect','docker://' + name ]
     try:
         client = docker.from_env()
-        result = client.containers.run('container-mirror:v1.0',command=skopeoinspectcmd,remove=True)
+        result = client.containers.run('container-mirror:latest',command=skopeoinspectcmd,remove=True)
         jsonresult = json.loads(result)
         imagedigest = jsonresult['Digest']
     except:
@@ -99,17 +99,24 @@ def writedb(name, digest):
 # Function to rsync data from container mirror to ssh destination
 def rsynccontainermirror():
 
-    subprocess.call(['rsync',
-    '--remove-source-files',
-    '-avz',
-    '-e',
-    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
-    cfg['skopeo']['destination'],
-    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
+    try:
+        subprocess.call(['rsync',
+        '--remove-source-files',
+        '-avz',
+        '-e',
+        "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+        cfg['skopeo']['destination'],
+        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
 
-    # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
-    subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
+        # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
+        subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
+
+
+    except Exception as e:
+        logger.error(e)
+        print(e)
+
 
 
 # Main function for running this module
@@ -137,7 +144,7 @@ def runcontainermirror():
             # Run skopeo list tags to get all tags for image
             try:
                 client = docker.from_env()
-                result = client.containers.run('container-mirror:v1.0',command=skopeolisttagscmd,remove=True)
+                result = client.containers.run('container-mirror:latest',command=skopeolisttagscmd,remove=True)
                 jsonresult = json.loads(result)
 
                 # Loop through each image tag and skopep sync it
