@@ -1,7 +1,8 @@
 # mirrorsync
 
-A simple set of scripts to automate the syncronization of various public repositories like apt, yum, pypi, & docker images. Please note this is a very interim solution. There is not a lot of error checking built into these scripts.
-DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used for docker images, bandersnatch is used for Pypi.
+A simple set of scripts (Python modules) to automate the syncronization of various public repositories like apt, yum, pypi, & docker images. DNF is used for yum mirrors, apt-mirror is used for apt mirrors, SKOPEO is used for docker images, bandersnatch is used for Pypi.
+
+Please note this is a very interim solution. There is not a lot of error checking built into these scripts.
 
 ## How it works
 

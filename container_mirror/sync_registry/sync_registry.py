@@ -39,6 +39,8 @@ def toregistry():
         else:
             # Remove temporary directory once done
             subprocess.call(['rm','-rf',tempsrcdir])
+            print("Syncronization complete")
+            logger.info("Syncronization complete")
             time.sleep(5)
 
     else:
