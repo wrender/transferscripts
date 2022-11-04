@@ -13,7 +13,7 @@ skopeo:
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
   dryrun: False
-  rsyncdestination: "/tmp/rsynced/mirrors/containers/"
+  rsyncdestination: "/opt/sync_registry/mycontainers/"
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
