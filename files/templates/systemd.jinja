@@ -8,7 +8,7 @@ TimeoutStartSec=0
 User={{ cfg.systemduser }}
 Group={{ cfg.systemduser }}
 Restart=always
-ExecStart=/opt/mirrorsync/main.py
+ExecStart=/usr/bin/python3 /opt/mirrorsync/main.py
 ExecStop=-/usr/bin/docker stop apt-mirror yum-mirror pypi-mirror container-mirror
 
 [Install]
