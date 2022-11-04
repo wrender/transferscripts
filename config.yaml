@@ -29,7 +29,7 @@ apt:
   # Remote server path to rsync to
   rsyncdestination: "/tmp/rsynced/mirrors/apt/"
   # How often to sync in minutes. Leave blank to disable.
-  frequency: '5'
+  frequency: ''
   # Time of day to run a sync
   timeofday: '02:00'
   # Sync on systemd service startup
@@ -54,7 +54,7 @@ yum:
   # Remote server path to rsync to
   rsyncdestination: "/tmp/rsynced/mirrors/yum/"
   # How often to sync in hours. Leave blank to disable.
-  frequency: '4'
+  frequency: ''
   timeofday: '01:30'
   # Sync on systemd service startup
   onstartup: False

@@ -2,11 +2,9 @@
 import logging
 import subprocess
 import sqlite3
-import socket
 import json
 import docker
 import yaml
-import psutil
 import os
 
 
@@ -108,14 +106,27 @@ def rsynccontainermirror():
         cfg['skopeo']['destination'],
         cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
-
-        # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
-        subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
-
-
     except Exception as e:
         logger.error(e)
         print(e)
+
+    else:
+        # Write a file showing completed
+        finishpath = cfg['skopeo']['destination'] + '/completed.txt'
+        f = open(finishpath, "x")
+        f.write("completed transfer run")
+
+        subprocess.call(['rsync',
+        '--remove-source-files',
+        '-avz',
+        '-e',
+        "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+        cfg['skopeo']['destination'] + '/completed.txt',
+        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])       
+
+    finally:    
+        # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
+        subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
 
 
 

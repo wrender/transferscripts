@@ -3,4 +3,4 @@ FROM quay.io/skopeo/stable:v1.10
 RUN useradd -u {{ sync_registry.systemduid }} {{ sync_registry.systemduser }}
 USER {{ sync_registry.systemduser }}
 {% endif -%}
-VOLUME ["/var/spool/apt-mirror"]
+VOLUME ["/var/lib/containers/storage"]
