@@ -5,7 +5,7 @@ import docker
 import logging
 
 with open('/opt/mirrorsync/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
@@ -55,7 +55,8 @@ def runyummirror():
             subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
         client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
         # Call rsync
-        rsyncyummirror()
+        if cfg['yum']['rsync'] == True:
+            rsyncyummirror()
    
     except Exception as e:
         logger.error('There was an error running the image.')

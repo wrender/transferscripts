@@ -5,7 +5,7 @@ import docker
 import logging
 
 with open('/opt/mirrorsync/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
@@ -44,7 +44,8 @@ def runpypimirror():
             subprocess.run(['mkdir','-p',cfg['pypi']['destination']], check=True)
         client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
         # Call rsync
-        rsyncpypimirror()
+        if cfg['pypi']['rsync'] == True:
+            rsyncpypimirror()
 
     except Exception as e:
         logger.error('There was an error running the image.')

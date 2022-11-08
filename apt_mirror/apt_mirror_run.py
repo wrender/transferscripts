@@ -6,7 +6,7 @@ import docker
 import jinja2
 
 with open('/opt/mirrorsync/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
@@ -43,7 +43,8 @@ def runaptmirror():
             subprocess.run(['mkdir','-p',cfg['apt']['destination']], check=True)
         client.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
         # Call rsync
-        rsyncaptmirror()
+        if cfg['apt']['rsync'] == True:
+            rsyncaptmirror()
 
     except Exception as e:
         logger.error('There was an error running the image.')

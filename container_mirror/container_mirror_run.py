@@ -10,7 +10,7 @@ import os
 
 # Get Configuration Values
 with open('/opt/mirrorsync/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
@@ -116,13 +116,14 @@ def rsynccontainermirror():
         f = open(finishpath, "x")
         f.write("completed transfer run")
 
-        subprocess.call(['rsync',
-        '--remove-source-files',
-        '-avz',
-        '-e',
-        "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
-        cfg['skopeo']['destination'] + '/completed.txt',
-        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])       
+        if cfg['skopeo']['rsync'] == True:
+            subprocess.call(['rsync',
+            '--remove-source-files',
+            '-avz',
+            '-e',
+            "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
+            cfg['skopeo']['destination'] + '/completed.txt',
+            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
     finally:    
         # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files

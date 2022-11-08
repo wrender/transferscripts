@@ -4,7 +4,7 @@ import docker
 import logging
 
 with open('/opt/sync_registry/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)

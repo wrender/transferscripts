@@ -5,7 +5,7 @@ import subprocess
 import sync_registry_build
 
 with open('/opt/sync_registry/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 try:
     from jinja2 import Environment, FileSystemLoader

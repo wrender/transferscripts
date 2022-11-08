@@ -1,7 +1,7 @@
 # mirrorsync
 mirrorsync:
   # Changing user or UID requires manual rerun of setup.py after
-  systemduser: 'transferbuddy'
+  systemduser: 'mirrorsync'
   # UID must be 1001 or higher
   systemduid: '1001'
   # Enable proxy. Proxy settings must be set in the user folder ~/.docker/config.json
@@ -16,14 +16,15 @@ skopeo:
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
   dryrun: False
+  rsync: False
   rsyncdestination: "/opt/sync_registry/mycontainers/"
 
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
 rsync:
-  sshuser: "wrender"
-  sshidentity: "/home/transferbuddy/.ssh/id_rsa"
+  sshuser: "mirrorsync"
+  sshidentity: "/home/mirrorsync/.ssh/id_rsa"
   sshserver: "192.168.1.6"
 
 # Ubuntu Repo Settings
@@ -32,6 +33,7 @@ apt:
   # Local Destination to sync to
   destination: "/tmp/mirrors/apt"
   # Remote server path to rsync to
+  rsync: False
   rsyncdestination: "/tmp/rsynced/mirrors/apt/"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '1'
@@ -56,6 +58,7 @@ apt:
 yum:
   enabled: True
   # Local Destination to sync to
+  rsync: False
   destination: "/tmp/mirrors/centos"
   # Remote server path to rsync to
   rsyncdestination: "/tmp/rsynced/mirrors/yum/"
@@ -96,6 +99,7 @@ pypi:
   # Local Destination to sync to
   destination: '/tmp/mirrors/pypi'
   # Remote server path to rsync to
+  rsync: False
   rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
   # How often to run in hours. Leave blank to disable.
   frequency: ''

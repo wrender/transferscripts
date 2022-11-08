@@ -8,7 +8,7 @@ import container_mirror.container_mirror_image
 import pypi_mirror.pypi_mirror_image
 
 with open('/opt/mirrorsync/config.yaml') as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 try:
     from jinja2 import Environment, FileSystemLoader
