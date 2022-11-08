@@ -4,6 +4,8 @@ mirrorsync:
   systemduser: 'transferbuddy'
   # UID must be 1001 or higher
   systemduid: '1001'
+  # Enable proxy. Proxy settings must be set in the user folder ~/.docker/config.json
+  configproxy: True
 
 # Skopeo Settings
 skopeo:
@@ -15,6 +17,7 @@ skopeo:
   frequency: '1'
   dryrun: False
   rsyncdestination: "/opt/sync_registry/mycontainers/"
+
 
 # RSYNC - Script uses RSYNC over SSH to sync files
 # RSYNC SSH Settings
@@ -85,7 +88,7 @@ yum:
       name: 'CentOS 7 Extras'
       baseurl: 'http://mirror.centos.org/centos/7/extras/x86_64/'
       gpgcheck: '0'
-      enabled: '0'  
+      enabled: '0'
 
 # Pypi/Bandersnatch Mirror Settings
 pypi:

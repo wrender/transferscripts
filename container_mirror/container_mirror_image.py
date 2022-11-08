@@ -28,7 +28,7 @@ def buildcontainermirror():
         logger.info('Building the container for container-mirror...')
         print('Building the container for container-mirror...')
         client = docker.from_env()
-        client.images.build(tag='container-mirror:v1.0',path='/opt/mirrorsync/container_mirror/files/',rm=True)
+        client.images.build(tag='container-mirror:v1.0',path='/opt/mirrorsync/container_mirror/files/',use_config_proxy=cfg['mirrorsync']['configproxy'],rm=True)
     except docker.errors.BuildError as e:
         logger.error('There was an error building the image: ' + e )
         print('There was an error building the image: ' + e )

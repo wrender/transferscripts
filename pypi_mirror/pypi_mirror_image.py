@@ -27,7 +27,7 @@ def buildpypimirror():
         logger.info('Building the container for pypi-mirror...')
         print('Building the container for pypi-mirror...')
         client = docker.from_env()
-        client.images.build(tag='pypi-mirror:v1.0',path='/opt/mirrorsync/pypi_mirror/files/',rm=True)
+        client.images.build(tag='pypi-mirror:v1.0',path='/opt/mirrorsync/pypi_mirror/files/',use_config_proxy=cfg['mirrorsync']['configproxy'],rm=True)
     except Exception as e:
         logger.error('There was an error building the image.')
         logger.error(e)
