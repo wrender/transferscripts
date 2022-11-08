@@ -7,6 +7,7 @@ mirrorsync:
 
 # Skopeo Settings
 skopeo:
+  enabled: True
   # Local Destination to sync to
   destination: "/tmp/mirrors/containers/"
   # How often to sync images in images.txt in minutes. Scopeo runs
@@ -24,12 +25,13 @@ rsync:
 
 # Ubuntu Repo Settings
 apt:
+  enabled: True
   # Local Destination to sync to
   destination: "/tmp/mirrors/apt"
   # Remote server path to rsync to
   rsyncdestination: "/tmp/rsynced/mirrors/apt/"
   # How often to sync in minutes. Leave blank to disable.
-  frequency: ''
+  frequency: '1'
   # Time of day to run a sync
   timeofday: '02:00'
   # Sync on systemd service startup
@@ -49,6 +51,7 @@ apt:
 
 # CentOS/RockyLinux Repo Settings
 yum:
+  enabled: True
   # Local Destination to sync to
   destination: "/tmp/mirrors/centos"
   # Remote server path to rsync to
@@ -86,6 +89,7 @@ yum:
 
 # Pypi/Bandersnatch Mirror Settings
 pypi:
+  enabled: True
   # Local Destination to sync to
   destination: '/tmp/mirrors/pypi'
   # Remote server path to rsync to

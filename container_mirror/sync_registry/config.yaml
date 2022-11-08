@@ -6,6 +6,6 @@ sync_registry:
 
   skopeo:
     dest-tls-verify: False
-    source: "/tmp/rsync/mycontainers/"
+    source: "/opt/sync_registry/mycontainers/"
     registrydestination: "localhost:5000"
     

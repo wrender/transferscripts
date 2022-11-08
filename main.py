@@ -68,23 +68,30 @@ def main():
             schedule.every(int(frequency)).minutes.do(mirror)
 
     # Schedule to call various module runs at different times
-    scheduletocall(mirror=runaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
-    scheduletocall(mirror=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
-    scheduletocall(mirror=runcontainermirror,frequency=cfg['skopeo']['frequency'])
-    scheduletocall(mirror=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
+    if cfg['apt']['enabled'] == True:
+        scheduletocall(mirror=runaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
+    if cfg['yum']['enabled'] == True:
+        scheduletocall(mirror=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
+    if cfg['skopeo']['enabled'] == True:
+        scheduletocall(mirror=runcontainermirror,frequency=cfg['skopeo']['frequency'])
+    if cfg['pypi']['enabled'] == True:
+        scheduletocall(mirror=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
 
     # Start the background thread
     run_continuously()
 
     # If modules are set to run on startup run them right away
-    if cfg['apt']['onstartup'] == True:
-        runaptmirror()
+    if cfg['apt']['enabled'] == True:
+        if cfg['apt']['onstartup'] == True:
+            runaptmirror()
 
-    if cfg['yum']['onstartup'] == True:      
-        runyummirror()
+    if cfg['yum']['enabled'] == True:
+        if cfg['yum']['onstartup'] == True:      
+            runyummirror()
 
-    if cfg['pypi']['onstartup'] == True:      
-        runpypimirror()   
+    if cfg['pypi']['enabled'] == True:
+        if cfg['pypi']['onstartup'] == True:      
+            runpypimirror()
 
 if __name__ == '__main__':
     main()
