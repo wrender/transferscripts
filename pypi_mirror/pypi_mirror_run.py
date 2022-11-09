@@ -34,7 +34,7 @@ def rsyncpypimirror():
     '-e',
     "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
     cfg['pypi']['destination'],
-    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsyncdestination']])
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']])
 
 # Main pypi mirror function
 def runpypimirror():
@@ -47,11 +47,7 @@ def runpypimirror():
         try:
             
             client = docker.from_env()
-            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
-            
-            # Call rsync
-            if cfg['pypi']['rsync'] == True:
-                rsyncpypimirror()
+            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=True,remove=True,user=cfg['mirrorsync']['systemduser'])
 
         except Exception as e:
             logger.debug('There was an error running the image.')
@@ -60,3 +56,7 @@ def runpypimirror():
     else:
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
+
+if cfg['pypi']['enabled'] == True:
+    if cfg['pypi']['onstartup'] == True:
+        runpypimirror()

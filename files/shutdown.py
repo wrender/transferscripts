@@ -20,8 +20,6 @@ def stopcontainerrunning(container_name: str):
         print('Stopping container: ' + container_name + ' . Shutting down.')
         logger.info('Stopping container: ' + container_name + ' . Shutting down.')
         container.stop()
-        container.remove()
-        return container_state["Status"] == RUNNING
 
 stopcontainerrunning('apt-mirror')
 stopcontainerrunning('yum-mirror')

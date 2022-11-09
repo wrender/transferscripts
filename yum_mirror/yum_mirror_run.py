@@ -45,7 +45,7 @@ def rsyncyummirror():
     '-e',
     "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
     cfg['yum']['destination'],
-    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['yum']['rsyncdestination']])
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['yum']['rsync']['rsyncdestination']])
 
 # Main function to run yum mirror
 def runyummirror():
@@ -58,10 +58,8 @@ def runyummirror():
         try:
             
             client = docker.from_env()
-            client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
-            # Call rsync
-            if cfg['yum']['rsync'] == True:
-                rsyncyummirror()
+            client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},detach=True,name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+            
 
         except Exception as e:
             logger.debug('There was an error running the image.')
@@ -71,3 +69,6 @@ def runyummirror():
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
 
+if cfg['yum']['enabled'] == True:
+    if cfg['yum']['onstartup'] == True:
+        runyummirror()

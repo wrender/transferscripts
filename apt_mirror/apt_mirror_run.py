@@ -34,7 +34,7 @@ def rsyncaptmirror():
     '-e',
     "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
     cfg['apt']['destination'],
-    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['apt']['rsyncdestination']])
+    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['apt']['rsync']['rsyncdestination']])
 
 def runaptmirror():
 
@@ -42,11 +42,12 @@ def runaptmirror():
         print('Trying to start container ' + modulename)
         logger.info('Trying to start container ' + modulename)
 
-    # Start the container if it is not running
+        # Start the container if it is not running
+
         try:
-            
-            client = docker.from_env()
-            client.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+
+            aptdockerclient = docker.from_env()
+            aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=True,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
             
             # Call rsync
             if cfg['apt']['rsync'] == True:
@@ -60,3 +61,7 @@ def runaptmirror():
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
 
+
+if cfg['apt']['enabled'] == True:
+    if cfg['apt']['onstartup'] == True:
+        runaptmirror()
