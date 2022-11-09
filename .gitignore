@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 container_mirror/transferred-containers.db
+config.yaml
+mirrorsync.log
 
 # Distribution / packaging
 bin/

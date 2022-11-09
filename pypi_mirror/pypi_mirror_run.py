@@ -3,12 +3,15 @@ import yaml
 import subprocess
 import docker
 import logging
+from files.common import checkcontainerrunning
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
+
+modulename = 'pypi-mirror'
 
 def setuppypimirror():
     from jinja2 import Environment, FileSystemLoader
@@ -36,24 +39,27 @@ def rsyncpypimirror():
 # Main pypi mirror function
 def runpypimirror():
 
-    # Try to run the container
-    try:
-        client = docker.from_env()
-        # If the systemd user is not root, create the directory as the other user.
-        if cfg['mirrorsync']['systemduser'] != 'root':
-            subprocess.run(['mkdir','-p',cfg['pypi']['destination']], check=True)
-        client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
-        # Call rsync
-        if cfg['pypi']['rsync'] == True:
-            rsyncpypimirror()
+    if checkcontainerrunning(modulename) == False:
+        print('Trying to start container ' + modulename)
+        logger.info('Trying to start container ' + modulename)
 
-    except Exception as e:
-        logger.error('There was an error running the image.')
-        logger.error(e)
-        print('There was an error running the image.')
-        print(e)
+        # Try to run the container
+        try:
+            
+            # If the systemd user is not root, create the directory as the other user.
+            if cfg['mirrorsync']['systemduser'] != 'root':
+                subprocess.run(['mkdir','-p',cfg['pypi']['destination']], check=True)
+            client = docker.from_env()
+            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+            
+            # Call rsync
+            if cfg['pypi']['rsync'] == True:
+                rsyncpypimirror()
+
+        except Exception as e:
+            logger.debug('There was an error running the image.')
+            logger.debug(e)
 
     else:
-        print('Container is running for pypi-mirror.')
-        logger.info('Container is running for pypi-mirror.')
-
+        print('Container is already running nothing to do ' + modulename)
+        logger.info('Container is already running nothing to do ' + modulename)

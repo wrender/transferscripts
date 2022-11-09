@@ -62,8 +62,9 @@ yum:
   destination: "/tmp/mirrors/centos"
   # Remote server path to rsync to
   rsyncdestination: "/tmp/rsynced/mirrors/yum/"
-  # How often to sync in hours. Leave blank to disable.
+  # How often to sync in minutes. Leave blank to disable.
   frequency: ''
+  # Time of day to run a sync
   timeofday: '01:30'
   # Sync on systemd service startup
   onstartup: False
@@ -101,7 +102,7 @@ pypi:
   # Remote server path to rsync to
   rsync: False
   rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
-  # How often to run in hours. Leave blank to disable.
+  # How often to run in minutes. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync
   timeofday: '21:35'

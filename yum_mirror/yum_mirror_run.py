@@ -3,12 +3,15 @@ import yaml
 import subprocess
 import docker
 import logging
+from files.common import checkcontainerrunning
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
 logger = logging.getLogger(__name__)
+
+modulename = 'yum-mirror'
 
 def setupyummirror():
     from jinja2 import Environment, FileSystemLoader
@@ -47,24 +50,27 @@ def rsyncyummirror():
 # Main function to run yum mirror
 def runyummirror():
 
-    # Try to run the container
-    try:
-        client = docker.from_env()
-        # If the systemd user is not root, create the directory as the other user.
-        if cfg['mirrorsync']['systemduser'] != 'root':
-            subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
-        client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
-        # Call rsync
-        if cfg['yum']['rsync'] == True:
-            rsyncyummirror()
-   
-    except Exception as e:
-        logger.error('There was an error running the image.')
-        logger.error(e)
-        print('There was an error running the image.')
-        print(e)
+    if checkcontainerrunning(modulename) == False:
+        print('Trying to start container ' + modulename)
+        logger.info('Trying to start container ' + modulename)
+        
+        # Try to run the container
+        try:
+            
+            # If the systemd user is not root, create the directory as the other user.
+            if cfg['mirrorsync']['systemduser'] != 'root':
+                subprocess.run(['mkdir','-p',cfg['yum']['destination']], check=True)
+            client = docker.from_env()
+            client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+            # Call rsync
+            if cfg['yum']['rsync'] == True:
+                rsyncyummirror()
+
+        except Exception as e:
+            logger.debug('There was an error running the image.')
+            logger.debug(e)
 
     else:
-        print('Container is running for yum-mirror.')
-        logger.info('Container is running yum apt-mirror.')
+        print('Container is already running nothing to do ' + modulename)
+        logger.info('Container is already running nothing to do ' + modulename)
 
