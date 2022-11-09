@@ -46,9 +46,6 @@ def runpypimirror():
         # Try to run the container
         try:
             
-            # If the systemd user is not root, create the directory as the other user.
-            if cfg['mirrorsync']['systemduser'] != 'root':
-                subprocess.run(['mkdir','-p',cfg['pypi']['destination']], check=True)
             client = docker.from_env()
             client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
             

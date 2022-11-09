@@ -10,6 +10,7 @@ Group={{ cfg.systemduser }}
 Restart=always
 ExecStart=/usr/bin/python3 /opt/mirrorsync/main.py
 ExecStop=/usr/bin/python3 /opt/mirrorsync/files/shutdown.py
+Environment=PYTHONPATH=/opt/mirrorsync/
 
 [Install]
 WantedBy=multi-user.target
