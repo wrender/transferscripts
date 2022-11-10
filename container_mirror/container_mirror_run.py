@@ -42,7 +42,7 @@ def skopeosync(dockerimage):
             print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             logger.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             client = docker.from_env()
-            client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'])
+            client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
 
             # Write image name, and digest to database so it is not downloaded again.
             writedb(dockerimage, imagedigest)
@@ -156,7 +156,7 @@ def runcontainermirror():
             # Run skopeo list tags to get all tags for image
             try:
                 client = docker.from_env()
-                result = client.containers.run('container-mirror:latest',command=skopeolisttagscmd,remove=True)
+                result = client.containers.run('container-mirror:latest',command=skopeolisttagscmd,remove=True,network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
                 jsonresult = json.loads(result)
 
                 # Loop through each image tag and skopep sync it

@@ -5,7 +5,9 @@ mirrorsync:
   # UID must be 1001 or higher
   systemduid: '1001'
   # Enable proxy. Proxy settings must be set in the user folder ~/.docker/config.json
-  configproxy: True
+  configproxy: False
+  # Set Docker networking mode
+  networkmode: 'bridge'
 
 # Skopeo Settings
 skopeo:

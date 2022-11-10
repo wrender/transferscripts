@@ -47,7 +47,7 @@ def runaptmirror():
         try:
 
             aptdockerclient = docker.from_env()
-            aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=True,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'])
+            aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=True,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
             # Call rsync
             if cfg['apt']['rsync'] == True:

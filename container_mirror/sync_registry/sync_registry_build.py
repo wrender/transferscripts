@@ -28,7 +28,7 @@ def buildcontainermirror():
         logger.info('Building the container for sync-registry...')
         print('Building the container for sync-registry...')
         client = docker.from_env()
-        client.images.build(tag='sync-registry:v1.0',path='/opt/sync_registry/files/',rm=True)
+        client.images.build(tag='sync-registry:v1.0',path='/opt/sync_registry/files/',network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'],rm=True)
     except docker.errors.BuildError as e:
         logger.error('There was an error building the image: ' + e )
         print('There was an error building the image: ' + e )

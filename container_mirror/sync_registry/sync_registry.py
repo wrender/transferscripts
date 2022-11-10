@@ -30,7 +30,7 @@ def toregistry():
             logger.info('Syncing images to repository...')
             skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['sync_registry']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/var/lib/containers/storage',cfg['sync_registry']['skopeo']['registrydestination'] ]
             client = docker.from_env()
-            client.containers.run('sync-registry:v1.0',volumes={tempsrcdir: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocommand,remove=True)
+            client.containers.run('sync-registry:v1.0',volumes={tempsrcdir: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocommand,remove=True,network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
         except Exception as e:
             print(e)

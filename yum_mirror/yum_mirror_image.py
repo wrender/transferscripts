@@ -27,7 +27,7 @@ def buildyummirror():
         logger.info('Building the container for yum-mirror...')
         print('Building the container for yum-mirror...')
         client = docker.from_env()
-        client.images.build(tag='yum-mirror:v1.0',path='/opt/mirrorsync/yum_mirror/files/',use_config_proxy=cfg['mirrorsync']['configproxy'],rm=True)
+        client.images.build(tag='yum-mirror:v1.0',path='/opt/mirrorsync/yum_mirror/files/',network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'],rm=True)
     except Exception as e:
         logger.error('There was an error building the image.')
         logger.error(e)
