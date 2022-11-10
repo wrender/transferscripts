@@ -22,4 +22,6 @@ set _tilde {{ apt.tilde }}
 {{ repo }}
 {% endfor %}
 
-clean {{ apt.clean }}
+{% for cleanitem in apt.clean -%}
+clean {{ cleanitem }}
+{% endfor %}
