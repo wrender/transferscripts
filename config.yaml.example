@@ -37,7 +37,8 @@ apt:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '5'
+    frequency: '480'
+    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/apt"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '1'
@@ -67,7 +68,8 @@ yum:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '5'
+    frequency: '480'
+    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/yum/"
   # How often to sync in minutes. Leave blank to disable.
   frequency: ''
@@ -109,7 +111,8 @@ pypi:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '5'
+    frequency: '480'
+    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
   # How often to run in minutes. Leave blank to disable.
   frequency: ''
@@ -143,3 +146,22 @@ pypi:
   maxpackagesize: '1M'
 
 
+centos:
+  enabled: True
+  sourcemirror: 'rsync://centos.mirror.rafal.ca/CentOS/'
+  # Destination to rsync to
+  destination: '/tmp/mirrors/centos/'
+  # Start running on startup
+  onstartup: True
+  # How often to run in minutes. Leave blank to disable.
+  frequency: '480'
+  # Time of day to run a sync
+  timeofday: ''
+  excludelist: '/opt/mirrorsync/centos_mirror/excludelist.txt'
+  rsync:
+    enabled: True
+    # How often to run in minutes. Leave blank to not set.
+    frequency: '480'
+    # Time of day to run a sync. Leave blank to not set.
+    timeofday: ''   
+    rsyncdestination: "/data/temp/centos/" 

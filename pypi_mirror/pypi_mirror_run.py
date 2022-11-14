@@ -3,7 +3,11 @@ import yaml
 import subprocess
 import docker
 import logging
+import shutil
+import os
 from files.common import checkcontainerrunning
+from files.common import checkpid
+from files.common import writepidfile
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
@@ -25,16 +29,26 @@ def setuppypimirror():
     with open("/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf", "w") as fh:
         fh.write(output_from_parsed_template)
 
-# Function to rsync data from container mirror to ssh destination
+# Function to rsync data from pypi mirror to ssh destination
 def rsyncpypimirror():
 
-    subprocess.call(['rsync',
-    '-avz',
-    '--delete',
-    '-e',
-    "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
-    cfg['pypi']['destination'],
-    cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']])
+    if checkpid('/tmp/mirrorsync/pypimirror.txt') == True:
+        print('Not doing anything, process is already running')
+    else:
+        if os.path.exists('/opt/mirrorsync/pypi_mirror/rsync-1.log'):
+            # Keep one rsync logging file for review
+            src_path = '/opt/mirrorsync/pypi_mirror/rsync-1.log'
+            dst_path = '/opt/mirrorsync/pypi_mirror/rsync-1-previous.log'
+            shutil.move(src_path, dst_path)
+
+        p = subprocess.Popen(['rsync',
+        '-azq',
+        '--delete',
+        '--log-file=/opt/mirrorsync/pypi_mirror/rsync-1.log',
+        cfg['pypi']['destination'],
+        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']])
+
+        writepidfile('/tmp/mirrorsync/pypimirror.txt', p.pid)
 
 # Main pypi mirror function
 def runpypimirror():
@@ -45,9 +59,20 @@ def runpypimirror():
 
         # Try to run the container
         try:
+
+            # Setup local directory
+            isExist = os.path.exists(cfg['pypi']['destination'])
+            if not isExist:
+                # Create a new directory because it does not exist
+                os.makedirs(cfg['pypi']['destination'])
             
             client = docker.from_env()
             client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=True,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            
+            # Call rsync
+            if cfg['pypi']['rsync']['enabled'] == True:
+                rsyncpypimirror()
+
 
         except Exception as e:
             logger.debug('There was an error running the image.')
@@ -56,7 +81,3 @@ def runpypimirror():
     else:
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
-
-if cfg['pypi']['enabled'] == True:
-    if cfg['pypi']['onstartup'] == True:
-        runpypimirror()

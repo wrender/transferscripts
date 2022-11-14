@@ -21,6 +21,20 @@ cursor = connection.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS transferred (name TEXT,digest TEXT)")
 cursor.close()
 
+# Function to inspect images
+def getimagedigest(name):
+    skopeoinspectcmd = ['inspect','docker://' + name ]
+    try:
+        client = docker.from_env()
+        result = client.containers.run('container-mirror:v1.0',command=skopeoinspectcmd,remove=True)
+        jsonresult = json.loads(result)
+        imagedigest = jsonresult['Digest']
+    except Exception as e:
+        logger.error(e)
+        logger.error('Could not get digest of image')
+    
+    return imagedigest
+
 
 # Function to run skopeo
 def skopeosync(dockerimage):
@@ -42,7 +56,7 @@ def skopeosync(dockerimage):
             print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             logger.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             client = docker.from_env()
-            client.containers.run('container-mirror:latest',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            client.containers.run('container-mirror:v1.0',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
 
             # Write image name, and digest to database so it is not downloaded again.
             writedb(dockerimage, imagedigest)
@@ -58,19 +72,6 @@ def skopeosync(dockerimage):
         print('Skopeo Sync: There was an error with the skopeo sync')
         print(e)
     
-
-# Function to inspect images
-def getimagedigest(name):
-    skopeoinspectcmd = ['inspect','docker://' + name ]
-    try:
-        client = docker.from_env()
-        result = client.containers.run('container-mirror:latest',command=skopeoinspectcmd,remove=True)
-        jsonresult = json.loads(result)
-        imagedigest = jsonresult['Digest']
-    except:
-        logger.error('Could not get digest of image')
-    
-    return imagedigest
 
 
 # Function to check database if item has been synced before 
@@ -102,7 +103,6 @@ def rsynccontainermirror():
         '--remove-source-files',
         '-avz',
         '-e',
-        "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
         cfg['skopeo']['destination'],
         cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
@@ -121,7 +121,6 @@ def rsynccontainermirror():
             '--remove-source-files',
             '-avz',
             '-e',
-            "ssh '-i" + cfg['rsync']['sshidentity'] + "'",
             cfg['skopeo']['destination'] + '/completed.txt',
             cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
@@ -134,8 +133,11 @@ def rsynccontainermirror():
 # Main function for running this module
 def runcontainermirror():
 
-    if cfg['mirrorsync']['systemduser'] != 'root':
-            subprocess.run(['mkdir','-p',cfg['skopeo']['destination']], check=True)
+    # Setup local directory
+    isExist = os.path.exists(cfg['skopeo']['destination'])
+    if not isExist:
+        # Create a new directory because it does not exist
+        os.makedirs(cfg['skopeo']['destination'])
 
     logger.info('Checking for images in /opt/mirrorsync/container_mirror/images.txt...')
 
