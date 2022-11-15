@@ -102,7 +102,6 @@ def rsynccontainermirror():
         subprocess.call(['rsync',
         '--remove-source-files',
         '-avz',
-        '-e',
         cfg['skopeo']['destination'],
         cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 
@@ -120,7 +119,6 @@ def rsynccontainermirror():
             subprocess.call(['rsync',
             '--remove-source-files',
             '-avz',
-            '-e',
             cfg['skopeo']['destination'] + '/completed.txt',
             cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
 

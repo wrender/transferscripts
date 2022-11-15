@@ -5,6 +5,7 @@ import docker
 import logging
 import shutil
 import os
+import threading
 from files.common import checkcontainerrunning
 from files.common import checkpid
 from files.common import writepidfile
@@ -29,6 +30,27 @@ def setuppypimirror():
     with open("/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf", "w") as fh:
         fh.write(output_from_parsed_template)
 
+# Create a class and put into own thread to run in background
+class PypiRYNC(threading.Thread):
+    def __init__(self):
+        self.stdout = None
+        self.stderr = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        p = subprocess.Popen(['rsync',
+                            '-avSHP',
+                            '--delete-after',
+                            '--log-file=/opt/mirrorsync/pypi_mirror/rsync-1.log',
+                            cfg['pypi']['destination'],
+                            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+                                 
+        writepidfile('/tmp/mirrorsync/pypimirror.txt', p.pid)
+
+        self.stdout, self.stderr = p.communicate()
+
 # Function to rsync data from pypi mirror to ssh destination
 def rsyncpypimirror():
 
@@ -41,14 +63,9 @@ def rsyncpypimirror():
             dst_path = '/opt/mirrorsync/pypi_mirror/rsync-1-previous.log'
             shutil.move(src_path, dst_path)
 
-        p = subprocess.Popen(['rsync',
-        '-azq',
-        '--delete',
-        '--log-file=/opt/mirrorsync/pypi_mirror/rsync-1.log',
-        cfg['pypi']['destination'],
-        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']])
+        myclass = PypiRYNC()
+        myclass.start()
 
-        writepidfile('/tmp/mirrorsync/pypimirror.txt', p.pid)
 
 # Main pypi mirror function
 def runpypimirror():

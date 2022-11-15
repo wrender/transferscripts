@@ -4,6 +4,9 @@ import yaml
 import schedule, time
 import threading
 import os
+# import tracemalloc
+
+# tracemalloc.start()
 
 # Import different modules
 from apt_mirror.apt_mirror_run import setupaptmirror
@@ -118,12 +121,21 @@ def main():
             if cfg['pypi']['rsync']['enabled'] == True:
                 schedule.every(10).seconds.do(run_threaded_once,rsyncpypimirror)
 
+
+
+
     
     # Main while loop for program that schedules jobs
     while 1:
         schedule.run_pending()
         time.sleep(1)
+        # snapshot = tracemalloc.take_snapshot()
+        # top_stats = snapshot.statistics('lineno')
 
+        # print("[ Top 10 ]")
+        # for stat in top_stats[:10]:
+        #     print(stat)
+        #     logger.info(stat)
 
 if __name__ == '__main__':
     main()
