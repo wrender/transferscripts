@@ -21,6 +21,8 @@ from pypi_mirror.pypi_mirror_run import runpypimirror
 from pypi_mirror.pypi_mirror_run import rsyncpypimirror
 from centos_mirror.centos_mirror_run import runcentosmirror
 from centos_mirror.centos_mirror_run import rsynccentosmirror
+from epel_mirror.epel_mirror_run import runepelmirror
+from epel_mirror.epel_mirror_run import rsyncepelmirror
 
 # Get Configuration Values
 with open('/opt/mirrorsync/config.yaml') as f:
@@ -81,6 +83,11 @@ def main():
         if cfg['centos']['rsync']['enabled'] == True:
             scheduletocall(task=rsynccentosmirror,frequency=cfg['centos']['rsync']['frequency'],timeofday=cfg['centos']['rsync']['timeofday'])
 
+    if cfg['epel']['enabled'] == True:
+        scheduletocall(task=runepelmirror,frequency=cfg['epel']['frequency'],timeofday=cfg['epel']['timeofday'])
+        if cfg['epel']['rsync']['enabled'] == True:
+            scheduletocall(task=rsyncepelmirror,frequency=cfg['epel']['rsync']['frequency'],timeofday=cfg['epel']['rsync']['timeofday'])
+
     if cfg['skopeo']['enabled'] == True:
         scheduletocall(task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
 
@@ -113,6 +120,12 @@ def main():
             schedule.every(3).seconds.do(run_threaded_once,runcentosmirror)
             if cfg['centos']['rsync']['enabled'] == True:
                 schedule.every(10).seconds.do(run_threaded_once,rsynccentosmirror)
+
+    if cfg['epel']['enabled'] == True:
+        if cfg['epel']['onstartup'] == True:
+            schedule.every(3).seconds.do(run_threaded_once,runepelmirror)
+            if cfg['epel']['rsync']['enabled'] == True:
+                schedule.every(10).seconds.do(run_threaded_once,rsyncepelmirror)
 
 
     if cfg['pypi']['enabled'] == True:

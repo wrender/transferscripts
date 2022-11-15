@@ -164,4 +164,24 @@ centos:
     frequency: '480'
     # Time of day to run a sync. Leave blank to not set.
     timeofday: ''   
-    rsyncdestination: "/data/temp/centos/" 
+    rsyncdestination: "/data/temp/centos/"
+
+epel:
+  enabled: True
+  sourcemirror: 'rsync://mirror.csclub.uwaterloo.ca/fedora/epel/'
+  # Destination to rsync to
+  destination: '/data/epel/'
+  # Start running on startup
+  onstartup: True
+  # How often to run in minutes. Leave blank to disable.
+  frequency: '480'
+  # Time of day to run a sync
+  timeofday: ''
+  excludelist: '/opt/mirrorsync/epel_mirror/excludelist.txt'
+  rsync:
+    enabled: False
+    # How often to run in minutes. Leave blank to not set.
+    frequency: '480'
+    # Time of day to run a sync. Leave blank to not set.
+    timeofday: ''   
+    rsyncdestination: "/data/temp/epel/"  

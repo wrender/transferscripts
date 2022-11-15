@@ -51,7 +51,7 @@ class AptRSYNC(threading.Thread):
         self.stdout, self.stderr = p.communicate()
 
 
-# Function to rsync data from container mirror to ssh destination
+# `213`nction to rsync data from container mirror to ssh destination
 def rsyncaptmirror():
 
     if checkpid('/tmp/mirrorsync/aptmirror.txt') == True:
