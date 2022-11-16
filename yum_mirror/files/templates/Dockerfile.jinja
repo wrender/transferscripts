@@ -1,5 +1,5 @@
 FROM rockylinux:9.0
-RUN dnf install -y yum-utils \
+RUN dnf install -y yum-utils wget \
   && \
     rm -rf /etc/yum.repos.d/* \
   && \

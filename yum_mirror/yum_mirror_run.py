@@ -84,6 +84,12 @@ def runyummirror():
         print('Trying to start container ' + modulename)
         logger.info('Trying to start container ' + modulename)
         
+        # Setup local directory
+        isExist = os.path.exists(cfg['yum']['destination'])
+        if not isExist:
+            # Create a new directory because it does not exist
+            os.makedirs(cfg['yum']['destination'])
+        
         # Try to run the container
         try:
             

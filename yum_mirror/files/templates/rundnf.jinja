@@ -2,6 +2,9 @@
 # Refresh mirror every X hours
 {% for repo in yum.repos -%}
 {% if yum.repos[repo].enabled == '1' -%}
-/bin/dnf reposync -g --delete -p /mnt/repos/ --repoid={{ yum.repos[repo].repoid }} --newest-only --download-metadata
+/bin/dnf reposync -g --delete -p /mnt/repos/ --repoid={{ yum.repos[repo].repoid }} --download-metadata
+{% if yum.repos[repo].downloadgpgkey == True -%}
+/bin/wget -P /mnt/repos/{{ yum.repos[repo].repoid }} {{ yum.repos[repo].gpgurl }}
+{% endif -%}
 {% endif -%}
 {% endfor %}

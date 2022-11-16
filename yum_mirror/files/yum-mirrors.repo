@@ -3,13 +3,11 @@
 [saltstack-redhat8]
 name=Saltstack Redhat 8
 baseurl=https://repo.saltproject.io/py3/redhat/8/x86_64/3004/
-gpgcheck=
+gpgcheck=0
 enabled=1
-
 
 [centos-7-base]
 name=CentOS 7 Base
 baseurl=http://mirror.centos.org/centos/7/os/x86_64/
 gpgcheck=0
 enabled=1
-

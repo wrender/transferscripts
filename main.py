@@ -35,7 +35,7 @@ fhandler = logging.FileHandler(filename='/opt/mirrorsync/mirrorsync.log', mode='
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fhandler.setFormatter(formatter)
 logger.addHandler(fhandler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Build the custom mirror images on startup
 print('Setting up different container file components...')
