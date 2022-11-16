@@ -1,6 +1,8 @@
 FROM quay.io/skopeo/stable:v1.10
+RUN mkdir -p /mnt/repos/
 {% if mirrorsync.systemduser != 'root' -%}
 RUN useradd -u {{ mirrorsync.systemduid }} {{ mirrorsync.systemduser }}
+RUN chown -R {{ mirrorsync.systemduser }} /mnt/repos
 USER {{ mirrorsync.systemduser }}
 {% endif -%}
-VOLUME ["/var/lib/containers/storage"]
+VOLUME ["/mnt/repos"]

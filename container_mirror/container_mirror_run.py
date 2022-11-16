@@ -40,9 +40,9 @@ def getimagedigest(name):
 def skopeosync(dockerimage):
 
     if cfg['skopeo']['dryrun'] == True:
-        skopeocmd = ['sync','--keep-going','--dry-run','--scoped','--src','docker','--dest', 'dir', dockerimage,'/var/lib/containers/storage']
+        skopeocmd = ['sync','--keep-going','--dry-run','--scoped','--src','docker','--dest', 'dir', dockerimage,'/mnt/repos']
     else:
-        skopeocmd = ['sync','--keep-going','--scoped','--src','docker','--dest','dir', dockerimage,'/var/lib/containers/storage']
+        skopeocmd = ['sync','--keep-going','--scoped','--src','docker','--dest','dir', dockerimage,'/mnt/repos']
      
     # Try to get image with scopeo
     try:
@@ -56,7 +56,7 @@ def skopeosync(dockerimage):
             print('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             logger.info('Skopeo Sync: Syncing image ' + dockerimage + ' ' + imagedigest)
             client = docker.from_env()
-            client.containers.run('container-mirror:v1.0',volumes={cfg['skopeo']['destination']: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            client.containers.run('container-mirror:v1.0',volumes={cfg['skopeo']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'}},command=skopeocmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
 
             # Write image name, and digest to database so it is not downloaded again.
             writedb(dockerimage, imagedigest)
