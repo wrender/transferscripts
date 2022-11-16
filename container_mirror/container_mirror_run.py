@@ -26,7 +26,7 @@ def getimagedigest(name):
     skopeoinspectcmd = ['inspect','docker://' + name ]
     try:
         client = docker.from_env()
-        result = client.containers.run('container-mirror:v1.0',command=skopeoinspectcmd,remove=True)
+        result = client.containers.run('container-mirror:v1.0',command=skopeoinspectcmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
         jsonresult = json.loads(result)
         imagedigest = jsonresult['Digest']
     except Exception as e:
@@ -156,7 +156,7 @@ def runcontainermirror():
             # Run skopeo list tags to get all tags for image
             try:
                 client = docker.from_env()
-                result = client.containers.run('container-mirror:latest',command=skopeolisttagscmd,remove=True,network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+                result = client.containers.run('container-mirror:v1.0',command=skopeolisttagscmd,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
                 jsonresult = json.loads(result)
 
                 # Loop through each image tag and skopep sync it
