@@ -3,7 +3,7 @@
 [{{ yum.repos[repo].repoid }}]
 name={{ yum.repos[repo].name }}
 baseurl={{ yum.repos[repo].baseurl }}
-gpgcheck={{ yum.repos[repo].gpgcheck }}
+gpgcheck=0
 enabled={{ yum.repos[repo].enabled }}
 
 {% endfor %}
