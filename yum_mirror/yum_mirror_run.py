@@ -74,7 +74,7 @@ def rsyncyummirror():
             dst_path = '/opt/mirrorsync/yum_mirror/rsync-1-previous.log'
             shutil.move(src_path, dst_path)
 
-        myclass = YumRSYNC
+        myclass = YumRSYNC()
         myclass.start()
 
 # Main function to run yum mirror
