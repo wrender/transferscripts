@@ -184,4 +184,17 @@ epel:
     frequency: '480'
     # Time of day to run a sync. Leave blank to not set.
     timeofday: ''   
-    rsyncdestination: "/data/temp/epel/"  
+    rsyncdestination: "/data/temp/epel/"
+
+ubuntu:
+  enabled: False
+  sourcemirror: 'rsync://mirror.csclub.uwaterloo.ca/ubuntu/'
+  # Local Destination to sync to
+  rsyncdestination: '/tmp/mirrors/ubuntu'
+  # Start running on startup
+  onstartup: True
+  # How often to run in hours. Leave blank to disable.
+  frequency: ''
+  # Time of day to run a sync
+  timeofday: '21:35'
+  excludelist: 'excluded-paths.txt'

@@ -102,7 +102,7 @@ def runcentosmirror():
         # Run RSYNC to local directory
         logger.debug('Trying to start rsync of centos')
         print('Trying to start rsync of centos')
-        myclass = CentOSMirrorLocal()
+        myclass = CentOSMirrorLocal
         myclass.start()
 
 
