@@ -1,8 +1,10 @@
-FROM quay.io/skopeo/stable:v1.10
+FROM alpine:3.17
 RUN mkdir -p /mnt/repos/
+RUN apk add --no-cache skopeo
 {% if mirrorsync.systemduser != 'root' -%}
-RUN useradd -u {{ mirrorsync.systemduid }} {{ mirrorsync.systemduser }}
+RUN addgroup -S {{ mirrorsync.systemduser }} && adduser -S {{ mirrorsync.systemduser }} -u {{ mirrorsync.systemduid }} -G {{ mirrorsync.systemduser }}
 RUN chown -R {{ mirrorsync.systemduser }} /mnt/repos
 USER {{ mirrorsync.systemduser }}
 {% endif -%}
 VOLUME ["/mnt/repos"]
+ENTRYPOINT ["/usr/bin/skopeo"]

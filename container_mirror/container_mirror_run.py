@@ -98,33 +98,38 @@ def writedb(name, digest):
 # Function to rsync data from container mirror to ssh destination
 def rsynccontainermirror():
 
-    try:
-        subprocess.call(['rsync',
-        '--remove-source-files',
-        '-avz',
-        cfg['skopeo']['destination'],
-        cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
+    if cfg['skopeo']['rsync']['enabled'] == True:
 
-    except Exception as e:
-        logger.error(e)
-        print(e)
+        try:
+            subprocess.call(['rsync',
+            '--remove-source-files',
+            '-avz',
+            cfg['skopeo']['destination'],
+            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsync']['rsyncdestination']])
 
-    else:
-        # Write a file showing completed
-        finishpath = cfg['skopeo']['destination'] + '/completed.txt'
-        f = open(finishpath, "x")
-        f.write("completed transfer run")
+        except Exception as e:
+            logger.error(e)
+            print(e)
 
-        if cfg['skopeo']['rsync'] == True:
+        else:
+            # Write a file showing completed
+            finishpath = cfg['skopeo']['destination'] + '/completed.txt'
+            f = open(finishpath, "x")
+            f.write("completed transfer run")
+
+
             subprocess.call(['rsync',
             '--remove-source-files',
             '-avz',
             cfg['skopeo']['destination'] + '/completed.txt',
-            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsyncdestination']])
+            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsync']['rsyncdestination']])
 
-    finally:    
-        # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
-        subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
+        finally:    
+            # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
+            subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
+
+    else:
+        return
 
 
 
@@ -174,5 +179,3 @@ def runcontainermirror():
         # Don't loop and just try and skopeo sync the single image  
         else:
             skopeosync(line)
-
-runcontainermirror()

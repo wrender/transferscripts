@@ -17,9 +17,10 @@ skopeo:
   # How often to sync images in images.txt in minutes. Scopeo runs
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
-  dryrun: False
-  rsync: False
-  rsyncdestination: "/opt/sync_registry/mycontainers/"
+  dryrun: True
+  rsync:
+    enabled: False
+    rsyncdestination: "/opt/sync_registry/mycontainers/"
 
 
 # RSYNC - Script uses RSYNC over SSH to sync files
@@ -143,58 +144,4 @@ pypi:
       - tf-nightly-gpu
       - tensorflow-gpu
   # Max Package Size to Sync. A package on allowlist overrides this.
-  maxpackagesize: '1M'
-
-
-centos:
-  enabled: True
-  sourcemirror: 'rsync://centos.mirror.rafal.ca/CentOS/'
-  # Destination to rsync to
-  destination: '/tmp/mirrors/centos/'
-  # Start running on startup
-  onstartup: True
-  # How often to run in minutes. Leave blank to disable.
-  frequency: '480'
-  # Time of day to run a sync
-  timeofday: ''
-  excludelist: '/opt/mirrorsync/centos_mirror/excludelist.txt'
-  rsync:
-    enabled: True
-    # How often to run in minutes. Leave blank to not set.
-    frequency: '480'
-    # Time of day to run a sync. Leave blank to not set.
-    timeofday: ''   
-    rsyncdestination: "/data/temp/centos/"
-
-epel:
-  enabled: True
-  sourcemirror: 'rsync://mirror.csclub.uwaterloo.ca/fedora/epel/'
-  # Destination to rsync to
-  destination: '/data/epel/'
-  # Start running on startup
-  onstartup: True
-  # How often to run in minutes. Leave blank to disable.
-  frequency: '480'
-  # Time of day to run a sync
-  timeofday: ''
-  excludelist: '/opt/mirrorsync/epel_mirror/excludelist.txt'
-  rsync:
-    enabled: False
-    # How often to run in minutes. Leave blank to not set.
-    frequency: '480'
-    # Time of day to run a sync. Leave blank to not set.
-    timeofday: ''   
-    rsyncdestination: "/data/temp/epel/"
-
-ubuntu:
-  enabled: False
-  sourcemirror: 'rsync://mirror.csclub.uwaterloo.ca/ubuntu/'
-  # Local Destination to sync to
-  rsyncdestination: '/tmp/mirrors/ubuntu'
-  # Start running on startup
-  onstartup: True
-  # How often to run in hours. Leave blank to disable.
-  frequency: ''
-  # Time of day to run a sync
-  timeofday: '21:35'
-  excludelist: 'excluded-paths.txt'
+  maxpackagesize: '1MB'
