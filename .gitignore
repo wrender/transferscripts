@@ -10,6 +10,7 @@ __pycache__/
 container_mirror/transferred-containers.db
 config.yaml
 mirrorsync.log
+container_mirror/auth.json
 
 # Distribution / packaging
 bin/

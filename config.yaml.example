@@ -18,6 +18,10 @@ skopeo:
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
   dryrun: True
+  # Enable authentication for skopeo inspect and sync
+  authentication:
+    enabled: True
+    authfile: '/opt/mirrorsync/container_mirror/auth.json'
   rsync:
     enabled: False
     rsyncdestination: "/opt/sync_registry/mycontainers/"
