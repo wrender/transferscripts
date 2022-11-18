@@ -10,4 +10,4 @@ enabled=1
 name=CentOS 7 Base
 baseurl=http://mirror.centos.org/centos/7/os/x86_64/
 gpgcheck=0
-enabled=1
+enabled=0

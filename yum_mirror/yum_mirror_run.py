@@ -59,6 +59,7 @@ class YumRSYNC(threading.Thread):
 
         self.stdout, self.stderr = p.communicate()
 
+
 # Function to rsync data from container mirror to ssh destination
 def rsyncyummirror():
     
@@ -103,3 +104,5 @@ def runyummirror():
     else:
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
+
+checkforadditional(cfg['yum']['repos'],cfg['yum']['destination'])
