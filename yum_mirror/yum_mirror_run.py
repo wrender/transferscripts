@@ -104,5 +104,3 @@ def runyummirror():
     else:
         print('Container is already running nothing to do ' + modulename)
         logger.info('Container is already running nothing to do ' + modulename)
-
-checkforadditional(cfg['yum']['repos'],cfg['yum']['destination'])
