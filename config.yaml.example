@@ -42,8 +42,6 @@ apt:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '480'
-    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/apt"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '1'
@@ -78,8 +76,6 @@ yum:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '480'
-    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/yum/"
   # How often to sync in minutes. Leave blank to disable.
   frequency: ''
@@ -123,8 +119,6 @@ pypi:
   # Remote server path to rsync to
   rsync:
     enabled: False
-    frequency: '480'
-    timeofday: ''
     rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
   # How often to run in minutes. Leave blank to disable.
   frequency: ''

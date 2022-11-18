@@ -58,18 +58,12 @@ def main():
     # Schedule to call various module runs at different times
     if cfg['apt']['enabled'] == True:
         scheduletocall(threadname='runaptmirror',task=runaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
-        if cfg['apt']['rsync']['enabled'] == True:
-            scheduletocall(threadname='rsyncaptmirror',task=rsyncaptmirror,frequency=cfg['apt']['rsync']['frequency'],timeofday=cfg['apt']['rsync']['timeofday'])
 
     if cfg['yum']['enabled'] == True:
         scheduletocall(threadname='runyummirror',task=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
-        if cfg['yum']['rsync']['enabled'] == True:
-            scheduletocall(threadname='rsyncyummirror',task=rsyncyummirror,frequency=cfg['yum']['rsync']['frequency'],timeofday=cfg['yum']['rsync']['timeofday'])
 
     if cfg['pypi']['enabled'] == True:
         scheduletocall(threadname='runyummirror',task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
-        if cfg['pypi']['rsync']['enabled'] == True:
-            scheduletocall(threadname='rsyncyummirror',task=rsyncpypimirror,frequency=cfg['pypi']['rsync']['frequency'],timeofday=cfg['pypi']['rsync']['timeofday'])
 
     if cfg['skopeo']['enabled'] == True:
         scheduletocall(threadname='runcontainermirror',task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
@@ -92,7 +86,6 @@ def main():
     if cfg['apt']['enabled'] == True:
         if cfg['apt']['onstartup'] == True:
             schedule.every(3).seconds.do(run_threaded_once,'runaptmirror',runaptmirror)
-
 
     if cfg['pypi']['enabled'] == True:
         if cfg['pypi']['onstartup'] == True:
