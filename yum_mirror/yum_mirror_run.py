@@ -7,8 +7,7 @@ import shutil
 import os
 import threading
 from files.common import checkcontainerrunning
-from files.common import checkpid
-from files.common import writepidfile
+from files.common import checkforadditional
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
@@ -57,25 +56,20 @@ class YumRSYNC(threading.Thread):
                             cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['yum']['rsync']['rsyncdestination']],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-                                 
-        writepidfile('/tmp/mirrorsync/yummirror.txt', p.pid)
 
         self.stdout, self.stderr = p.communicate()
 
 # Function to rsync data from container mirror to ssh destination
 def rsyncyummirror():
     
-    if checkpid('/tmp/mirrorsync/yummirror.txt') == True:
-        print('Not doing anything, process is already running')
-    else:
-        if os.path.exists('/opt/mirrorsync/apt_mirror/rsync-1.log'):
-            # Keep one rsync logging file for review
-            src_path = '/opt/mirrorsync/yum_mirror/rsync-1.log'
-            dst_path = '/opt/mirrorsync/yum_mirror/rsync-1-previous.log'
-            shutil.move(src_path, dst_path)
+    if os.path.exists('/opt/mirrorsync/apt_mirror/rsync-1.log'):
+        # Keep one rsync logging file for review
+        src_path = '/opt/mirrorsync/yum_mirror/rsync-1.log'
+        dst_path = '/opt/mirrorsync/yum_mirror/rsync-1-previous.log'
+        shutil.move(src_path, dst_path)
 
-        myclass = YumRSYNC()
-        myclass.start()
+    myclass = YumRSYNC()
+    myclass.start()
 
 # Main function to run yum mirror
 def runyummirror():
@@ -94,8 +88,10 @@ def runyummirror():
         try:
             
             client = docker.from_env()
-            client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},detach=True,name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            client.containers.run('yum-mirror:v1.0',volumes={cfg['yum']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/rundnf.sh':{'bind': '/opt/rundnf.sh', 'mode': 'rw'},'/opt/mirrorsync/yum_mirror/files/yum-mirrors.repo':{'bind': '/etc/yum.repos.d/mirrors.repo', 'mode': 'rw'}},detach=False,name='yum-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
+            checkforadditional(cfg['yum']['repos'],cfg['yum']['destination'])
+
             # Call rsync
             if cfg['yum']['rsync']['enabled'] == True:
                 rsyncyummirror()

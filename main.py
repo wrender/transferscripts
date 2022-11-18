@@ -38,73 +38,71 @@ setupaptmirror()
 setupyummirror()
 setuppypimirror()
 
-# Setup pid directory
-isExist = os.path.exists('/tmp/mirrorsync/')
-if not isExist:
-   # Create a new directory because it does not exist
-   os.makedirs('/tmp/mirrorsync/')
-
 def main():
 
-    def run_threaded(job_func):
-        job_thread = threading.Thread(target=job_func)
+    def run_threaded(threadname:str,job_func):
+        for th in threading.enumerate():
+            if th.name == threadname:
+                logger.info(threadname + " is still running. Nothing to do right now")
+                return
+        job_thread = threading.Thread(name=threadname,target=job_func)
         job_thread.start()
 
     # Function to check and call hourly or at a specific daily time
-    def scheduletocall(task,frequency,timeofday: str=None):
+    def scheduletocall(threadname: str,task,frequency,timeofday: str=None):
         if timeofday is not None and len(timeofday) != 0:
-            schedule.every().day.at(str(timeofday)).do(run_threaded,task)
+            schedule.every().day.at(str(timeofday)).do(run_threaded,threadname,task)
         if frequency is not None and len(frequency) != 0:
-            schedule.every(int(frequency)).minutes.do(run_threaded,task)
+            schedule.every(int(frequency)).minutes.do(run_threaded,threadname,task)
 
     # Schedule to call various module runs at different times
     if cfg['apt']['enabled'] == True:
-        scheduletocall(task=runaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
+        scheduletocall(threadname='runaptmirror',task=runaptmirror,frequency=cfg['apt']['frequency'],timeofday=cfg['apt']['timeofday'])
         if cfg['apt']['rsync']['enabled'] == True:
-            scheduletocall(task=rsyncaptmirror,frequency=cfg['apt']['rsync']['frequency'],timeofday=cfg['apt']['rsync']['timeofday'])
+            scheduletocall(threadname='rsyncaptmirror',task=rsyncaptmirror,frequency=cfg['apt']['rsync']['frequency'],timeofday=cfg['apt']['rsync']['timeofday'])
 
     if cfg['yum']['enabled'] == True:
-        scheduletocall(task=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
+        scheduletocall(threadname='runyummirror',task=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
         if cfg['yum']['rsync']['enabled'] == True:
-            scheduletocall(task=rsyncyummirror,frequency=cfg['yum']['rsync']['frequency'],timeofday=cfg['yum']['rsync']['timeofday'])
+            scheduletocall(threadname='rsyncyummirror',task=rsyncyummirror,frequency=cfg['yum']['rsync']['frequency'],timeofday=cfg['yum']['rsync']['timeofday'])
 
     if cfg['pypi']['enabled'] == True:
-        scheduletocall(task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
+        scheduletocall(threadname='runyummirror',task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
         if cfg['pypi']['rsync']['enabled'] == True:
-            scheduletocall(task=rsyncpypimirror,frequency=cfg['pypi']['rsync']['frequency'],timeofday=cfg['pypi']['rsync']['timeofday'])
+            scheduletocall(threadname='rsyncyummirror',task=rsyncpypimirror,frequency=cfg['pypi']['rsync']['frequency'],timeofday=cfg['pypi']['rsync']['timeofday'])
 
     if cfg['skopeo']['enabled'] == True:
-        scheduletocall(task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
+        scheduletocall(threadname='runcontainermirror',task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
 
     
     # Run these jobs below only once on startup if they are enabled.
-    def run_threaded_once(job_func):
-        job_thread = threading.Thread(target=job_func)
+    def run_threaded_once(threadname:str, job_func):
+        for th in threading.enumerate():
+            if th.name == threadname:
+                logger.info(threadname + " is still running. Nothing to do right now")
+                return
+        job_thread = threading.Thread(name=threadname,target=job_func)
         job_thread.start()
         return schedule.CancelJob
 
     if cfg['yum']['enabled'] == True:
         if cfg['yum']['onstartup'] == True:
-            schedule.every(3).seconds.do(run_threaded_once,runyummirror)
-            if cfg['yum']['rsync']['enabled'] == True:
-                schedule.every(10).seconds.do(run_threaded_once,rsyncyummirror)
+            schedule.every(3).seconds.do(run_threaded_once,'runyummirror',runyummirror)
 
     if cfg['apt']['enabled'] == True:
         if cfg['apt']['onstartup'] == True:
-            schedule.every(3).seconds.do(run_threaded_once,runaptmirror)
-            if cfg['apt']['rsync']['enabled'] == True:
-                schedule.every(10).seconds.do(run_threaded_once,rsyncaptmirror)
+            schedule.every(3).seconds.do(run_threaded_once,'runaptmirror',runaptmirror)
 
 
     if cfg['pypi']['enabled'] == True:
         if cfg['pypi']['onstartup'] == True:
-            schedule.every(3).seconds.do(run_threaded_once,runpypimirror)
-            if cfg['pypi']['rsync']['enabled'] == True:
-                schedule.every(10).seconds.do(run_threaded_once,rsyncpypimirror)
+            schedule.every(3).seconds.do(run_threaded_once,'runpypimirror',runpypimirror)
+
 
     
     # Main while loop for program that schedules jobs
     while 1:
+        
         schedule.run_pending()
         time.sleep(1)
 

@@ -36,3 +36,43 @@ def checkpid(pidfile: str):
 def writepidfile(pidfile: str, pid):
     with open(pidfile, 'w', encoding='utf-8') as f:
         f.write(str(pid))
+
+def checkforadditional(repos, destination):
+    # Check for additional files
+    for item, k in repos.items():
+        if k['additionalfiles']:
+            # Setup local directory
+            isExist = os.path.exists(destination + '/additionalfiles')
+            if not isExist:
+                # Create a new directory because it does not exist
+                os.makedirs(destination + '/additionalfiles')
+            # Loop through files and download    
+            for file in k['additionalfiles']:
+                logger.info('Additional files downloading item for: ' + item + ' ' + file )
+                p = subprocess.run(['wget','-c','-P',destination + '/additionalfiles/',file])
+
+    # Check for additional folders
+    for item, k in repos.items():
+        if k['additionaldirectories']:
+            # Setup local directory
+            isExist = os.path.exists(destination + '/additionaldirectories')
+            if not isExist:
+                # Create a new directory because it does not exist
+                os.makedirs(destination + '/additionaldirectories')
+            # Loop through folders and download    
+            for file in k['additionaldirectories']:
+                logger.info('Additional folders downloading item for: ' + item + ' ' + file )
+                p = subprocess.run(['wget','-np','-m','-P',destination + '/additionaldirectories/',file])
+
+    # Check for gpg key
+    for item, k in repos.items():
+        if k['gpgkeyfiles']:
+            # Setup local directory
+            isExist = os.path.exists(destination + '/gpgkeyfiles')
+            if not isExist:
+                # Create a new directory because it does not exist
+                os.makedirs(destination + '/gpgkeyfiles')
+            # Loop through files and download    
+            for file in k['gpgkeyfiles']:
+                logger.info('Downloading GPG Items: ' + item + ' ' + file )
+                subprocess.run(['wget','-c','-P',destination + '/gpgkeyfiles/',file])

@@ -7,9 +7,7 @@ import shutil
 import os
 import threading
 from files.common import checkcontainerrunning
-from files.common import checkpid
-from files.common import writepidfile
-
+from files.common import checkforadditional
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
@@ -46,8 +44,6 @@ class AptRSYNC(threading.Thread):
                             cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['apt']['rsync']['rsyncdestination']],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-                                 
-        writepidfile('/tmp/mirrorsync/aptmirror.txt', p.pid)
 
         self.stdout, self.stderr = p.communicate()
 
@@ -55,19 +51,14 @@ class AptRSYNC(threading.Thread):
 # Section to rsync data from container mirror to ssh destination
 def rsyncaptmirror():
 
-    if checkpid('/tmp/mirrorsync/aptmirror.txt') == True:
-        print('Not doing anything, process is already running')
-    else:
-        if os.path.exists('/opt/mirrorsync/apt_mirror/rsync-1.log'):
-            # Keep one rsync logging file for review
-            src_path = '/opt/mirrorsync/apt_mirror/rsync-1.log'
-            dst_path = '/opt/mirrorsync/apt_mirror/rsync-1-previous.log'
-            shutil.move(src_path, dst_path)
+    if os.path.exists('/opt/mirrorsync/apt_mirror/rsync-1.log'):
+        # Keep one rsync logging file for review
+        src_path = '/opt/mirrorsync/apt_mirror/rsync-1.log'
+        dst_path = '/opt/mirrorsync/apt_mirror/rsync-1-previous.log'
+        shutil.move(src_path, dst_path)
 
-        myclass = AptRSYNC()
-        myclass.start()
-
-
+    myclass = AptRSYNC()
+    myclass.start()
 
 def runaptmirror():
 
@@ -84,23 +75,9 @@ def runaptmirror():
         # Start the container if it is not running
         try:
             aptdockerclient = docker.from_env()
-            aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=True,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=False,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
-            logger.info('testing testng')
-
-
-            # Check for additional files
-            for item, k in cfg['apt']['repos'].items():
-                if k['additionalfiles']:
-                    # Setup local directory
-                    isExist = os.path.exists(cfg['apt']['destination'] + '/additionalfiles')
-                    if not isExist:
-                        # Create a new directory because it does not exist
-                        os.makedirs(cfg['apt']['destination'] + '/additionalfiles')
-                    # Loop through files and download    
-                    for file in k['additionalfiles']:
-                        logger.info('APT Mirror: Additional files Downloading item for: ' + item + ' ' + file )
-                        subprocess.Popen(['wget','-c','-P',cfg['apt']['destination'] + '/additionalfiles/',file])
+            checkforadditional(cfg['apt']['repos'],cfg['apt']['destination'])
 
             # Call rsync
             if cfg['apt']['rsync']['enabled'] == True:

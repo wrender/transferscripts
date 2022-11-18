@@ -7,8 +7,6 @@ import shutil
 import os
 import threading
 from files.common import checkcontainerrunning
-from files.common import checkpid
-from files.common import writepidfile
 
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
@@ -47,24 +45,19 @@ class PypiRYNC(threading.Thread):
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
                                  
-        writepidfile('/tmp/mirrorsync/pypimirror.txt', p.pid)
-
         self.stdout, self.stderr = p.communicate()
 
 # Function to rsync data from pypi mirror to ssh destination
 def rsyncpypimirror():
 
-    if checkpid('/tmp/mirrorsync/pypimirror.txt') == True:
-        print('Not doing anything, process is already running')
-    else:
-        if os.path.exists('/opt/mirrorsync/pypi_mirror/rsync-1.log'):
-            # Keep one rsync logging file for review
-            src_path = '/opt/mirrorsync/pypi_mirror/rsync-1.log'
-            dst_path = '/opt/mirrorsync/pypi_mirror/rsync-1-previous.log'
-            shutil.move(src_path, dst_path)
+    if os.path.exists('/opt/mirrorsync/pypi_mirror/rsync-1.log'):
+        # Keep one rsync logging file for review
+        src_path = '/opt/mirrorsync/pypi_mirror/rsync-1.log'
+        dst_path = '/opt/mirrorsync/pypi_mirror/rsync-1-previous.log'
+        shutil.move(src_path, dst_path)
 
-        myclass = PypiRYNC()
-        myclass.start()
+    myclass = PypiRYNC()
+    myclass.start()
 
 
 # Main pypi mirror function
@@ -84,7 +77,7 @@ def runpypimirror():
                 os.makedirs(cfg['pypi']['destination'])
             
             client = docker.from_env()
-            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=True,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=False,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
             # Call rsync
             if cfg['pypi']['rsync']['enabled'] == True:
