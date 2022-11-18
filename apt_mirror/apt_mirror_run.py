@@ -10,6 +10,7 @@ from files.common import checkcontainerrunning
 from files.common import checkpid
 from files.common import writepidfile
 
+
 with open('/opt/mirrorsync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
@@ -51,7 +52,7 @@ class AptRSYNC(threading.Thread):
         self.stdout, self.stderr = p.communicate()
 
 
-# `213`nction to rsync data from container mirror to ssh destination
+# Section to rsync data from container mirror to ssh destination
 def rsyncaptmirror():
 
     if checkpid('/tmp/mirrorsync/aptmirror.txt') == True:
@@ -66,6 +67,8 @@ def rsyncaptmirror():
         myclass = AptRSYNC()
         myclass.start()
 
+
+
 def runaptmirror():
 
     # Setup local directory
@@ -79,12 +82,26 @@ def runaptmirror():
         logger.info('Trying to start container ' + modulename)
 
         # Start the container if it is not running
-
         try:
-
             aptdockerclient = docker.from_env()
             aptdockerclient.containers.run('apt-mirror:v1.0',volumes={cfg['apt']['destination']: {'bind': '/var/spool/apt-mirror', 'mode': 'rw'},'/opt/mirrorsync/apt_mirror/files/apt-mirror.list':{'bind': '/etc/apt/mirror.list', 'mode': 'rw'}},detach=True,name='apt-mirror',remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
+            logger.info('testing testng')
+
+
+            # Check for additional files
+            for item, k in cfg['apt']['repos'].items():
+                if k['additionalfiles']:
+                    # Setup local directory
+                    isExist = os.path.exists(cfg['apt']['destination'] + '/additionalfiles')
+                    if not isExist:
+                        # Create a new directory because it does not exist
+                        os.makedirs(cfg['apt']['destination'] + '/additionalfiles')
+                    # Loop through files and download    
+                    for file in k['additionalfiles']:
+                        logger.info('APT Mirror: Additional files Downloading item for: ' + item + ' ' + file )
+                        subprocess.Popen(['wget','-c','-P',cfg['apt']['destination'] + '/additionalfiles/',file])
+
             # Call rsync
             if cfg['apt']['rsync']['enabled'] == True:
                 rsyncaptmirror()

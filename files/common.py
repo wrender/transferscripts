@@ -3,6 +3,7 @@ import docker
 import logging
 import os
 import psutil
+import subprocess
 
 
 # Setup Module logger

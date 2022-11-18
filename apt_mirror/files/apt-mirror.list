@@ -16,9 +16,6 @@ set _tilde 0
 ############# end config ##############
 
 deb https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main
-deb https://ppa.launchpadcontent.net/ansible/ansible/ubuntu/ focal main
-deb https://apt.puppetlabs.com/ bionic puppet7
-deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse
 
 
 clean http://archive.ubuntu.com/ubuntu

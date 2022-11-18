@@ -19,7 +19,7 @@ set _tilde {{ apt.tilde }}
 ############# end config ##############
 
 {% for repo in apt.repos -%}
-{{ repo }}
+{{ apt.repos[repo].mirror }}
 {% endfor %}
 
 {% for cleanitem in apt.clean -%}
