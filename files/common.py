@@ -41,35 +41,25 @@ def checkforadditional(repos, destination):
     # Check for additional files
     
     for item, repokey in repos.items():
+        # Setup local directory
+        isExist = os.path.exists(destination + '/downloads')
+        if not isExist:
+            # Create a new directory because it does not exist
+            os.makedirs(destination + '/downloads')
         if 'additionalfiles' in repokey:
-            # Setup local directory
-            isExist = os.path.exists(destination + '/additionalfiles')
-            if not isExist:
-                # Create a new directory because it does not exist
-                os.makedirs(destination + '/additionalfiles')
             # Loop through files and download    
             for file in repokey['additionalfiles']:
                 logger.info('Additional files downloading item for: ' + item + ' ' + file )
-                subprocess.run(['wget','-c','-P',destination + '/additionalfiles/',file])
+                subprocess.run(['wget','-c','-P',destination + '/downloads/',file])
 
         if 'additionaldirectories' in repokey:
-            # Setup local directory
-            isExist = os.path.exists(destination + '/additionaldirectories')
-            if not isExist:
-                # Create a new directory because it does not exist
-                os.makedirs(destination + '/additionaldirectories')
             # Loop through folders and download    
             for file in repokey['additionaldirectories']:
                 logger.info('Additional folders downloading item for: ' + item + ' ' + file )
-                subprocess.run(['wget','-nH','-np','-m','-P',destination + '/additionaldirectories/',file])
+                subprocess.run(['wget','-nH','-np','-m','-P',destination + '/downloads/',file])
 
         if 'gpgkeyfiles' in repokey:
-            # Setup local directory
-            isExist = os.path.exists(destination + '/gpgkeyfiles')
-            if not isExist:
-                # Create a new directory because it does not exist
-                os.makedirs(destination + '/gpgkeyfiles')
             # Loop through files and download    
             for file in repokey['gpgkeyfiles']:
                 logger.info('Downloading GPG Items: ' + item + ' ' + file )
-                subprocess.run(['wget','-c','-P',destination + '/gpgkeyfiles/',file])
+                subprocess.run(['wget','-c','-P',destination + '/downloads/',file])
