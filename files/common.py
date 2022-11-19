@@ -61,7 +61,7 @@ def checkforadditional(repos, destination):
             # Loop through folders and download    
             for file in repokey['additionaldirectories']:
                 logger.info('Additional folders downloading item for: ' + item + ' ' + file )
-                subprocess.run(['wget','-np','-m','-P',destination + '/additionaldirectories/',file])
+                subprocess.run(['wget','-nH','-np','-m','-P',destination + '/additionaldirectories/',file])
 
         if 'gpgkeyfiles' in repokey:
             # Setup local directory
