@@ -3,20 +3,18 @@ import logging
 import yaml
 import schedule, time
 import threading
-import os
 # import tracemalloc
 
 # Import different modules
 from apt_mirror.apt_mirror_run import setupaptmirror
 from apt_mirror.apt_mirror_run import runaptmirror
-from apt_mirror.apt_mirror_run import rsyncaptmirror
 from yum_mirror.yum_mirror_run import runyummirror
 from yum_mirror.yum_mirror_run import setupyummirror
-from yum_mirror.yum_mirror_run import rsyncyummirror
 from container_mirror.container_mirror_run import runcontainermirror
 from pypi_mirror.pypi_mirror_run import setuppypimirror
 from pypi_mirror.pypi_mirror_run import runpypimirror
-from pypi_mirror.pypi_mirror_run import rsyncpypimirror
+from rclone_mirror.rclone_mirror_run import setuprclonemirror
+from rclone_mirror.rclone_mirror_run import rclonemirror
 
 
 # Get Configuration Values
@@ -37,6 +35,7 @@ logger.info('Setting up different container file components...')
 setupaptmirror()
 setupyummirror()
 setuppypimirror()
+setuprclonemirror()
 
 def main():
 
@@ -65,6 +64,9 @@ def main():
     if cfg['pypi']['enabled'] == True:
         scheduletocall(threadname='runyummirror',task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
 
+    if cfg['rclone']['enabled'] == True:
+        scheduletocall(threadname='rclonemirror',task=rclonemirror,frequency=cfg['rclone']['frequency'],timeofday=cfg['rclone']['timeofday'])
+
     if cfg['skopeo']['enabled'] == True:
         scheduletocall(threadname='runcontainermirror',task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
 
@@ -91,7 +93,9 @@ def main():
         if cfg['pypi']['onstartup'] == True:
             schedule.every(3).seconds.do(run_threaded_once,'runpypimirror',runpypimirror)
 
-
+    if cfg['rclone']['enabled'] == True:
+        if cfg['rclone']['onstartup'] == True:
+            schedule.every(3).seconds.do(run_threaded_once,'rclone',rclonemirror)
     
     # Main while loop for program that schedules jobs
     while 1:

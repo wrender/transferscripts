@@ -22,27 +22,21 @@ skopeo:
   authentication:
     enabled: True
     authfile: '/opt/mirrorsync/container_mirror/auth.json'
-  rsync:
+  rclone:
     enabled: False
-    rsyncdestination: "/opt/sync_registry/mycontainers/"
+    destination: "/opt/sync_registry/mycontainers/"
 
 
-# RSYNC - Script uses RSYNC over SSH to sync files
-# RSYNC SSH Settings
-rsync:
-  sshuser: "mirrorsync"
-  sshidentity: "/home/mirrorsync/.ssh/id_rsa"
-  sshserver: "192.168.1.6"
 
 # Ubuntu Repo Settings
 apt:
   enabled: True
   # Local Destination to sync to
   destination: "/tmp/mirrors/apt"
-  # Remote server path to rsync to
-  rsync:
+  # Remote server path to rclone to
+  rclone:
     enabled: False
-    rsyncdestination: "/tmp/rsynced/mirrors/apt"
+    destination: "/tmp/mirrors/apt"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '1'
   # Time of day to run a sync
@@ -73,10 +67,10 @@ yum:
   enabled: True
   # Local Destination to sync to
   destination: "/tmp/mirrors/centos"
-  # Remote server path to rsync to
-  rsync:
+  # Remote server path to rclone to
+  rclone:
     enabled: False
-    rsyncdestination: "/tmp/rsynced/mirrors/yum/"
+    destination: "/tmp/mirrors/yum"
   # How often to sync in minutes. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync
@@ -116,10 +110,10 @@ pypi:
   enabled: True
   # Local Destination to sync to
   destination: '/tmp/mirrors/pypi'
-  # Remote server path to rsync to
-  rsync:
+  # Remote server path to rclone to
+  rclone:
     enabled: False
-    rsyncdestination: "/tmp/rsynced/mirrors/pypi/"
+    destination: "/tmp/mirrors/pypi"
   # How often to run in minutes. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync
@@ -150,3 +144,42 @@ pypi:
       - tensorflow-gpu
   # Max Package Size to Sync. A package on allowlist overrides this.
   maxpackagesize: '1MB'
+
+# rclone HTTPS Mirror
+# This module loops through various http/https sources and mirrors them to the destination using rclone
+rclone:
+  enabled: False
+  # How often to run in hours. Leave blank to disable.
+  frequency: '480'
+  # Time of day to run a sync
+  timeofday: ''
+  # Start running on startup
+  onstartup: True
+  # Set bandwidth limits. See https://rclone.org/docs/#bwlimit-bandwidth-spec
+  bwlimit: '10G:5M'
+  
+  mirrors:
+    centos:
+      # The source needs to be an https or http url
+      source: 'http://centos.mirror.rafal.ca'
+      # The path or filename from the source to sync
+      sourcepath: '/8.2.2004'
+      # Destination must be set to a local path or remote you have setup with 'rclone config'
+      destination: 'remote:/data/temp/centos/8.2.2004'
+      # Exclude these folders from download
+      exclude:
+        - 8/**
+        - 8-stream/**
+        - 8.0.1905/**
+        - 8.1.1911/**
+        - 8.2.2004/**
+        - 8.3.2011/**
+        - 8.4.2105/**
+        - 8.5.2111/**
+    # ubuntu-archive:
+    #   source: 'https://mirror.csclub.uwaterloo.ca/ubuntu'
+    #   # Destination can be remote or local
+    #   destination: 'remote:/data/temp/ubuntu/'
+    #   # List of exclude patterns
+    #   exclude:
+    #     - '/test'

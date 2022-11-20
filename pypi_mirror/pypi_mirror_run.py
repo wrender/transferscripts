@@ -3,9 +3,8 @@ import yaml
 import subprocess
 import docker
 import logging
-import shutil
 import os
-import threading
+import shutil
 from files.common import checkcontainerrunning
 
 with open('/opt/mirrorsync/config.yaml') as f:
@@ -28,36 +27,24 @@ def setuppypimirror():
     with open("/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf", "w") as fh:
         fh.write(output_from_parsed_template)
 
-# Create a class and put into own thread to run in background
-class PypiRYNC(threading.Thread):
-    def __init__(self):
-        self.stdout = None
-        self.stderr = None
-        threading.Thread.__init__(self)
 
-    def run(self):
-        p = subprocess.Popen(['rsync',
-                            '-avSHP',
-                            '--delete-after',
-                            '--log-file=/opt/mirrorsync/pypi_mirror/rsync-1.log',
-                            cfg['pypi']['destination'],
-                            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['pypi']['rsync']['rsyncdestination']],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-                                 
-        self.stdout, self.stderr = p.communicate()
 
-# Function to rsync data from pypi mirror to ssh destination
-def rsyncpypimirror():
+# Function to rclone data from pypi mirror to ssh destination
+def rclonepypimirror():
 
-    if os.path.exists('/opt/mirrorsync/pypi_mirror/rsync-1.log'):
+    if os.path.exists('/opt/mirrorsync/pypi_mirror/rclone.log'):
         # Keep one rsync logging file for review
-        src_path = '/opt/mirrorsync/pypi_mirror/rsync-1.log'
-        dst_path = '/opt/mirrorsync/pypi_mirror/rsync-1-previous.log'
+        src_path = '/opt/mirrorsync/pypi_mirror/rclone.log'
+        dst_path = '/opt/mirrorsync/pypi_mirror/rclone.log-previous.log'
         shutil.move(src_path, dst_path)
 
-    myclass = PypiRYNC()
-    myclass.start()
+    subprocess.run(['rclone',
+                    'sync',
+                    '-v',
+                    '--log-file',
+                    '/opt/mirrorsync/pypi_mirror/rclone.log',
+                    cfg['pypi']['destination'],
+                    'remote:' + cfg['pypi']['rclone']['destination']])
 
 
 # Main pypi mirror function
@@ -79,9 +66,9 @@ def runpypimirror():
             client = docker.from_env()
             client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=False,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
-            # Call rsync
-            if cfg['pypi']['rsync']['enabled'] == True:
-                rsyncpypimirror()
+            # Call rclone
+            if cfg['pypi']['rclone']['enabled'] == True:
+                rclonepypimirror()
 
 
         except Exception as e:

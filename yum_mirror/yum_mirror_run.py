@@ -3,9 +3,8 @@ import yaml
 import subprocess
 import docker
 import logging
-import shutil
 import os
-import threading
+import shutil
 from files.common import checkcontainerrunning
 from files.common import checkforadditional
 
@@ -40,37 +39,22 @@ def setupyummirror():
     with open("/opt/mirrorsync/yum_mirror/files/rundnf.sh", "w") as fh:
         fh.write(output_from_parsed_template)
 
-# Create a class and put into own thread to run in background
-class YumRSYNC(threading.Thread):
-    def __init__(self):
-        self.stdout = None
-        self.stderr = None
-        threading.Thread.__init__(self)
+# Function to rclone data from container mirror to ssh destination
+def rcloneyummirror():
 
-    def run(self):
-        p = subprocess.Popen(['rsync',
-                            '-avSHP',
-                            '--delete-after',
-                            '--log-file=/opt/mirrorsync/yum_mirror/rsync-1.log',
-                            cfg['yum']['destination'],
-                            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['yum']['rsync']['rsyncdestination']],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-
-        self.stdout, self.stderr = p.communicate()
-
-
-# Function to rsync data from container mirror to ssh destination
-def rsyncyummirror():
-    
-    if os.path.exists('/opt/mirrorsync/apt_mirror/rsync-1.log'):
+    if os.path.exists('/opt/mirrorsync/yum_mirror/rclone.log'):
         # Keep one rsync logging file for review
-        src_path = '/opt/mirrorsync/yum_mirror/rsync-1.log'
-        dst_path = '/opt/mirrorsync/yum_mirror/rsync-1-previous.log'
+        src_path = '/opt/mirrorsync/yum_mirror/rclone.log'
+        dst_path = '/opt/mirrorsync/yum_mirror/rclone.log-previous.log'
         shutil.move(src_path, dst_path)
-
-    myclass = YumRSYNC()
-    myclass.start()
+    
+    subprocess.run(['rclone',
+                    'sync',
+                    '-v',
+                    '--log-file',
+                    '/opt/mirrorsync/yum_mirror/rclone.log',
+                    cfg['yum']['destination'],
+                    'remote:' + cfg['yum']['rclone']['destination']])
 
 # Main function to run yum mirror
 def runyummirror():
@@ -93,9 +77,9 @@ def runyummirror():
             
             checkforadditional(cfg['yum']['repos'],cfg['yum']['destination'])
 
-            # Call rsync
-            if cfg['yum']['rsync']['enabled'] == True:
-                rsyncyummirror()
+            # Call rclone
+            if cfg['yum']['rclone']['enabled'] == True:
+                rcloneyummirror()
 
         except Exception as e:
             logger.debug('There was an error running the image.')

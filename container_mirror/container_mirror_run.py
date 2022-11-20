@@ -82,7 +82,7 @@ def skopeosync(dockerimage):
                 writedb(dockerimage, imagedigest)
 
                 # Run function to syncronize container to destination
-                rsynccontainermirror()
+                rclonecontainermirror()
 
                 return True
             
@@ -114,16 +114,16 @@ def writedb(name, digest):
 
     return
 
-# Function to rsync data from container mirror to ssh destination
-def rsynccontainermirror():
+# Function to rclone data from container mirror to ssh destination
+def rclonecontainermirror():
 
-    if cfg['skopeo']['rsync']['enabled'] == True:
+    if cfg['skopeo']['rclone']['enabled'] == True:
         try:
-            subprocess.call(['rsync',
-            '--remove-source-files',
-            '-avz',
-            cfg['skopeo']['destination'],
-            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsync']['rsyncdestination']])
+            subprocess.run(['rclone',
+                'move',
+                '-v',
+                cfg['skopeo']['destination'],
+                'remote:' + cfg['skopeo']['rclone']['destination']])
         except Exception as e:
             logger.error(e)
             print(e)
@@ -133,11 +133,13 @@ def rsynccontainermirror():
             f = open(finishpath, "x")
             f.write("completed transfer run")
 
-            subprocess.call(['rsync',
-            '--remove-source-files',
-            '-avz',
-            cfg['skopeo']['destination'] + '/completed.txt',
-            cfg['rsync']['sshuser'] + '@' + cfg['rsync']['sshserver'] + ':' + cfg['skopeo']['rsync']['rsyncdestination']])
+            # Move file to remote folder to show transfer completed
+            subprocess.run(['rclone',
+                'moveto',
+                '-v',
+                cfg['skopeo']['destination'] + '/completed.txt',
+                'remote:' + cfg['skopeo']['rclone']['destination']])
+
         finally:    
             # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files
             subprocess.call(['find',cfg['skopeo']['destination'],'-empty','-delete'])
