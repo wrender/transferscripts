@@ -1,0 +1,10 @@
+FROM alpine:3.17
+RUN mkdir -p /mnt/repos/
+RUN apk add --no-cache skopeo
+{% if registrysync.systemduser != 'root' -%}
+RUN addgroup -S {{ registrysync.systemduser }} && adduser -S {{ registrysync.systemduser }} -u {{ registrysync.systemduid }} -G {{ registrysync.systemduser }}
+RUN chown -R {{ registrysync.systemduser }} /mnt/repos
+USER {{ registrysync.systemduser }}
+{% endif -%}
+VOLUME ["/mnt/repos"]
+ENTRYPOINT ["/usr/bin/skopeo"]

@@ -2,20 +2,20 @@
 import jinja2
 import yaml
 import subprocess
-import sync_registry_build
+import registrysync_build
 
-with open('/opt/sync_registry/config.yaml') as f:
+with open('/opt/registrysync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 try:
     from jinja2 import Environment, FileSystemLoader
-    env = Environment(loader=FileSystemLoader('/opt/sync_registry/files/templates'))
+    env = Environment(loader=FileSystemLoader('/opt/registrysync/files/templates'))
     template = env.get_template('systemd.jinja')
-    output_from_parsed_template = template.render(cfg=cfg['sync_registry'])
+    output_from_parsed_template = template.render(cfg=cfg['registrysync'])
 
     try:       
         # Create systemd from config
-        with open("/etc/systemd/system/sync_registry.service", "w") as fh:
+        with open("/etc/systemd/system/registrysync.service", "w") as fh:
             fh.write(output_from_parsed_template)
     except Exception as e:
         print('This needs to be run with sudo or root: ')
@@ -28,5 +28,5 @@ except Exception as e:
     print(e)
 
 else:
-    print('\n' + 'Systemd service setup. You can start service with "systemctl enable sync_registry --now')
+    print('\n' + 'Systemd service setup. You can start service with "systemctl enable registrysync --now')
 

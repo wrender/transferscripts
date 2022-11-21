@@ -8,7 +8,7 @@ import time
 
 
 # Get Configuration Values
-with open('/opt/sync_registry/config.yaml') as f:
+with open('/opt/registrysync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
 # Setup Module logger
@@ -16,21 +16,21 @@ logger = logging.getLogger(__name__)
 
 
 def toregistry():
-    tempsrcdir = cfg['sync_registry']['skopeo']['source'] +'tmp/'
+    tempsrcdir = cfg['registrysync']['skopeo']['source'] +'tmp/'
 
-    if os.path.exists(cfg['sync_registry']['skopeo']['source'] + '/completed.txt'):
+    if os.path.exists(cfg['registrysync']['skopeo']['source'] + '/completed.txt'):
 
         # Move files to a temporary directory to syncronize them to image registry
         os.mkdir(tempsrcdir)
-        subprocess.call(['mv ' + cfg['sync_registry']['skopeo']['source'] + '*',tempsrcdir],shell=True)
+        subprocess.call(['mv ' + cfg['registrysync']['skopeo']['source'] + '*',tempsrcdir],shell=True)
 
         try:
             # Try to syncronize files to image registry
             print('Syncing images to repository...')
             logger.info('Syncing images to repository...')
-            skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['sync_registry']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/var/lib/containers/storage',cfg['sync_registry']['skopeo']['registrydestination'] ]
+            skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['registrysync']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/var/lib/containers/storage',cfg['registrysync']['skopeo']['registrydestination'] ]
             client = docker.from_env()
-            client.containers.run('sync-registry:v1.0',volumes={tempsrcdir: {'bind': '/var/lib/containers/storage', 'mode': 'rw'}},command=skopeocommand,remove=True,network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            client.containers.run('registry-sync:v1.0',volumes={tempsrcdir: {'bind': '/mnt/repos', 'mode': 'rw'}},command=skopeocommand,remove=True,network_mode=cfg['registrysync']['networkmode'],use_config_proxy=cfg['registrysync']['configproxy'])
             
         except Exception as e:
             print(e)
