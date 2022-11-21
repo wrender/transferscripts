@@ -43,7 +43,7 @@ def rcloneaptmirror():
                     '--log-file',
                     '/opt/mirrorsync/apt_mirror/rclone.log',
                     cfg['apt']['destination'],
-                    'remote:' + cfg['apt']['rclone']['destination']])
+                    cfg['apt']['rclone']['destination']])
 
 def runaptmirror():
 

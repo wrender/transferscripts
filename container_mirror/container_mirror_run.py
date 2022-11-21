@@ -123,7 +123,7 @@ def rclonecontainermirror():
                 'move',
                 '-v',
                 cfg['skopeo']['destination'],
-                'remote:' + cfg['skopeo']['rclone']['destination']])
+                cfg['skopeo']['rclone']['destination']])
         except Exception as e:
             logger.error(e)
             print(e)
@@ -138,7 +138,7 @@ def rclonecontainermirror():
                 'moveto',
                 '-v',
                 cfg['skopeo']['destination'] + '/completed.txt',
-                'remote:' + cfg['skopeo']['rclone']['destination']])
+                cfg['skopeo']['rclone']['destination']])
 
         finally:    
             # For Skopeo remove old directories, as Skopeo currently doesn't support syncing files

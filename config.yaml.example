@@ -24,7 +24,7 @@ skopeo:
     authfile: '/opt/mirrorsync/container_mirror/auth.json'
   rclone:
     enabled: False
-    destination: "/opt/sync_registry/mycontainers/"
+    destination: "remote:/opt/sync_registry/mycontainers/"
 
 
 
@@ -36,7 +36,7 @@ apt:
   # Remote server path to rclone to
   rclone:
     enabled: False
-    destination: "/tmp/mirrors/apt"
+    destination: "remote:/tmp/mirrors/apt"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '1'
   # Time of day to run a sync
@@ -70,7 +70,7 @@ yum:
   # Remote server path to rclone to
   rclone:
     enabled: False
-    destination: "/tmp/mirrors/yum"
+    destination: "remote:/tmp/mirrors/yum"
   # How often to sync in minutes. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync
@@ -113,7 +113,7 @@ pypi:
   # Remote server path to rclone to
   rclone:
     enabled: False
-    destination: "/tmp/mirrors/pypi"
+    destination: "remote:/tmp/mirrors/pypi"
   # How often to run in minutes. Leave blank to disable.
   frequency: ''
   # Time of day to run a sync

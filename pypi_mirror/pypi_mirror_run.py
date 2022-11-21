@@ -5,6 +5,7 @@ import docker
 import logging
 import os
 import shutil
+import time
 from files.common import checkcontainerrunning
 
 with open('/opt/mirrorsync/config.yaml') as f:
@@ -44,7 +45,7 @@ def rclonepypimirror():
                     '--log-file',
                     '/opt/mirrorsync/pypi_mirror/rclone.log',
                     cfg['pypi']['destination'],
-                    'remote:' + cfg['pypi']['rclone']['destination']])
+                    cfg['pypi']['rclone']['destination']])
 
 
 # Main pypi mirror function
@@ -63,13 +64,12 @@ def runpypimirror():
                 # Create a new directory because it does not exist
                 os.makedirs(cfg['pypi']['destination'])
             
-            client = docker.from_env()
-            client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=False,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
+            # client = docker.from_env()
+            # client.containers.run('pypi-mirror:v1.0',volumes={cfg['pypi']['destination']: {'bind': '/mnt/repos', 'mode': 'rw'},'/opt/mirrorsync/pypi_mirror/files/bandersnatch.conf':{'bind': '/conf/bandersnatch.conf', 'mode': 'rw'}},name='pypi-mirror',detach=False,remove=True,user=cfg['mirrorsync']['systemduser'],network_mode=cfg['mirrorsync']['networkmode'],use_config_proxy=cfg['mirrorsync']['configproxy'])
             
             # Call rclone
             if cfg['pypi']['rclone']['enabled'] == True:
                 rclonepypimirror()
-
 
         except Exception as e:
             logger.debug('There was an error running the image.')

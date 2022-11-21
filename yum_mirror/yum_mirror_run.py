@@ -54,7 +54,7 @@ def rcloneyummirror():
                     '--log-file',
                     '/opt/mirrorsync/yum_mirror/rclone.log',
                     cfg['yum']['destination'],
-                    'remote:' + cfg['yum']['rclone']['destination']])
+                    cfg['yum']['rclone']['destination']])
 
 # Main function to run yum mirror
 def runyummirror():

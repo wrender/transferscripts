@@ -62,7 +62,7 @@ def main():
         scheduletocall(threadname='runyummirror',task=runyummirror,frequency=cfg['yum']['frequency'],timeofday=cfg['yum']['timeofday'])
 
     if cfg['pypi']['enabled'] == True:
-        scheduletocall(threadname='runyummirror',task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
+        scheduletocall(threadname='runpypimirror',task=runpypimirror,frequency=cfg['pypi']['frequency'],timeofday=cfg['pypi']['timeofday'])
 
     if cfg['rclone']['enabled'] == True:
         scheduletocall(threadname='rclonemirror',task=rclonemirror,frequency=cfg['rclone']['frequency'],timeofday=cfg['rclone']['timeofday'])
