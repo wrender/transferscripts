@@ -95,7 +95,7 @@ def main():
 
     if cfg['rclone']['enabled'] == True:
         if cfg['rclone']['onstartup'] == True:
-            schedule.every(3).seconds.do(run_threaded_once,'rclone',rclonemirror)
+            schedule.every(3).seconds.do(run_threaded_once,'rclonemirror',rclonemirror)
     
     # Main while loop for program that schedules jobs
     while 1:
