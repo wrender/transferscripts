@@ -162,7 +162,7 @@ rclone:
     centos:
       # The source needs to be an https or http url
       source: 'http://centos.mirror.rafal.ca'
-      # The path or filename from the source to sync
+      # The path or filename from the source to sync. Can just be '/' for everything.
       sourcepath: '/8.2.2004'
       # Destination must be set to a local path or remote you have setup with 'rclone config'
       destination: 'remote:/data/temp/centos/8.2.2004'
