@@ -36,6 +36,8 @@ def rclonemirror():
         subprocess.run(['rclone',
                 'sync',
                 '-v',
+                '--log-file',
+                '/opt/mirrorsync/rclone_mirror/rclone-' + item + '.log',
                 '--exclude-from',
                 '/opt/mirrorsync/rclone_mirror/files/exclude-file-' + item + '.txt',
                 '--bwlimit',
