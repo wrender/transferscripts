@@ -13,7 +13,6 @@ from yum_mirror.yum_mirror_run import setupyummirror
 from container_mirror.container_mirror_run import runcontainermirror
 from pypi_mirror.pypi_mirror_run import setuppypimirror
 from pypi_mirror.pypi_mirror_run import runpypimirror
-from rclone_mirror.rclone_mirror_run import setuprclonemirror
 from rclone_mirror.rclone_mirror_run import rclonemirror
 
 
@@ -35,7 +34,6 @@ logger.info('Setting up different container file components...')
 setupaptmirror()
 setupyummirror()
 setuppypimirror()
-setuprclonemirror()
 
 def main():
 

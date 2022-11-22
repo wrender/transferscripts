@@ -30,9 +30,9 @@ def rclonemirror():
     for item, key in cfg['rclone']['mirrors'].items():
 
         # Setup exclude for each mirror
-        print(item)
         setuprclonemirror(item)
 
+        # Run process for rclone
         subprocess.run(['rclone',
                 'sync',
                 '-v',
@@ -44,5 +44,3 @@ def rclonemirror():
                 key['source'],
                 ':http:' + key['sourcepath'],
                 key['destination']])
-
-rclonemirror()
