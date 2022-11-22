@@ -1,5 +1,1 @@
-{%- for mirror in rclone.mirrors -%}
-{% for exclude in rclone.mirrors[mirror].exclude -%}
-{{ exclude }}
-{% endfor -%}
-{% endfor -%}
+{{ exclude | join("\n") }}
