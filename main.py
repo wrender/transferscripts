@@ -14,6 +14,7 @@ from container_mirror.container_mirror_run import runcontainermirror
 from pypi_mirror.pypi_mirror_run import setuppypimirror
 from pypi_mirror.pypi_mirror_run import runpypimirror
 from rclone_mirror.rclone_mirror_run import rclonemirror
+from helm_mirror.helm_mirror_run import runhelmmirror
 
 
 # Get Configuration Values
@@ -68,6 +69,9 @@ def main():
     if cfg['skopeo']['enabled'] == True:
         scheduletocall(threadname='runcontainermirror',task=runcontainermirror,frequency=cfg['skopeo']['frequency'])
 
+    if cfg['helm']['enabled'] == True:
+        scheduletocall(threadname='runhelmmirror',task=runhelmmirror,frequency=cfg['helm']['frequency'],timeofday=cfg['helm']['timeofday'])
+
     
     # Run these jobs below only once on startup if they are enabled.
     def run_threaded_once(threadname:str, job_func):
@@ -90,6 +94,10 @@ def main():
     if cfg['pypi']['enabled'] == True:
         if cfg['pypi']['onstartup'] == True:
             schedule.every(3).seconds.do(run_threaded_once,'runpypimirror',runpypimirror)
+
+    if cfg['helm']['enabled'] == True:
+        if cfg['helm']['onstartup'] == True:
+            schedule.every(3).seconds.do(run_threaded_once,'runhelmmirror',runhelmmirror)
 
     if cfg['rclone']['enabled'] == True:
         if cfg['rclone']['onstartup'] == True:

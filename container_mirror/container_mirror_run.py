@@ -148,7 +148,7 @@ def rclonecontainermirror():
 
 
 # Main function for running this module
-def runcontainermirror():
+def runcontainermirror(imagelist=None):
 
     # Setup local directory
     isExist = os.path.exists(cfg['skopeo']['destination'])
@@ -158,10 +158,15 @@ def runcontainermirror():
 
     logger.info('Checking for images in /opt/mirrorsync/container_mirror/images.txt...')
 
-    # Using readlines() to iterate through list of repositories. 
-    with open('/opt/mirrorsync/container_mirror/images.txt', 'r+') as f:
-        alist = [line.rstrip() for line in f]
-        f.truncate(0)
+    # Check for image list on function, or file
+    if imagelist:
+        print(imagelist)
+        alist = imagelist
+    else: 
+        # Using readlines() to iterate through list of repositories. 
+        with open('/opt/mirrorsync/container_mirror/images.txt', 'r+') as f:
+            alist = [line.rstrip() for line in f]
+            f.truncate(0)
 
     # For each container image name in the file list images.txt
     for line in alist:

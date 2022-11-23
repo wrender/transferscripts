@@ -26,7 +26,26 @@ skopeo:
     enabled: False
     destination: "remote:/opt/sync_registry/mycontainers/"
 
-
+helm:
+  # Enabling helm charts automatically runs skopeo to download images.
+  enabled: False
+  destination: '/tmp/mirrors/helm/'
+  # How often to sync in minutes. Leave blank to disable.
+  frequency: '480'
+  # Time of day to run a sync
+  timeofday: ''
+  # Sync on systemd service startup
+  onstartup: True
+  kubeversion: 'v1.23.13'
+  mirrors:
+    rancher-stable:
+      url: 'https://releases.rancher.com/server-charts/stable'
+      charts:
+        - 'rancher'
+    harbor:
+      url: 'https://helm.goharbor.io'
+      charts:
+        - harbor
 
 # Ubuntu Repo Settings
 apt:
