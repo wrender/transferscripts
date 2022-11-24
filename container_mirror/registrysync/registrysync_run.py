@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import logging
-import docker
 import yaml
 import os
 import subprocess
@@ -28,9 +27,10 @@ def toregistry():
             # Try to syncronize files to image registry
             print('Syncing images to repository...')
             logger.info('Syncing images to repository...')
-            skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['registrysync']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/var/lib/containers/storage',cfg['registrysync']['skopeo']['registrydestination'] ]
-            client = docker.from_env()
-            client.containers.run('registry-sync:v1.0',volumes={tempsrcdir: {'bind': '/mnt/repos', 'mode': 'rw'}},command=skopeocommand,remove=True,network_mode=cfg['registrysync']['networkmode'],use_config_proxy=cfg['registrysync']['configproxy'])
+            skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['registrysync']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/mnt/repos',cfg['registrysync']['skopeo']['registrydestination'] ]
+
+
+            subprocess.run(['docker','run','--rm','-v',tempsrcdir + ':/mnt/repos','registry-sync:v1.0',skopeocommand])
             
         except Exception as e:
             print(e)
@@ -41,11 +41,11 @@ def toregistry():
             subprocess.call(['rm','-rf',tempsrcdir])
             print("Syncronization complete")
             logger.info("Syncronization complete")
-            time.sleep(5)
+            time.sleep(1)
 
     else:
         print('Nothing to do')
-        time.sleep(5)
+        time.sleep(1)
         return
 
 toregistry()
