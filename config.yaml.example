@@ -20,7 +20,7 @@ skopeo:
   dryrun: True
   # Enable authentication for skopeo inspect and sync
   authentication:
-    enabled: True
+    enabled: False
     authfile: '/opt/mirrorsync/container_mirror/auth.json'
   rclone:
     enabled: False
