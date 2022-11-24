@@ -30,6 +30,10 @@ helm:
   # Enabling helm charts automatically runs skopeo to download images.
   enabled: False
   destination: '/tmp/mirrors/helm/'
+  # Remote server path to rclone to
+  rclone:
+    enabled: False
+    destination: "remote:/opt/sync_registry/helm/"
   # How often to sync in minutes. Leave blank to disable.
   frequency: '480'
   # Time of day to run a sync

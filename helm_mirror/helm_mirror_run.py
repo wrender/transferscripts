@@ -15,6 +15,25 @@ logger = logging.getLogger(__name__)
 
 modulename = 'helm-mirror'
 
+# Section to rclone data from container mirror to ssh destination
+def rclonehelmmirror():
+
+
+    if os.path.exists('/opt/mirrorsync/helm_mirror/rclone.log'):
+        # Keep one rsync logging file for review
+        src_path = '/opt/mirrorsync/helm_mirror/rclone.log'
+        dst_path = '/opt/mirrorsync/helm_mirror/rclone.log-previous.log'
+        shutil.move(src_path, dst_path)
+
+    subprocess.run(['rclone',
+                    'sync',
+                    '-v',
+                    '--log-file',
+                    '/opt/mirrorsync/helm_mirror/rclone.log',
+                    cfg['helm']['destination'],
+                    cfg['helm']['rclone']['destination']])
+
+
 def runhelmmirror():
     # Setup local directory
     isExist = os.path.exists(cfg['helm']['destination'])
@@ -78,3 +97,5 @@ def runhelmmirror():
             print('Running Skopeo to get images for chart: ' + chart)
             # Use the container_mirror Skopeo sync functions to fetch the images
             container_mirror.container_mirror_run.runcontainermirror(resultlist)
+
+    rclonehelmmirror()
