@@ -11,6 +11,14 @@ container_mirror/transferred-containers.db
 config.yaml
 mirrorsync.log
 container_mirror/auth.json
+container_mirror/files/Dockerfile
+apt_mirror/files/Dockerfile
+apt_mirror/files/apt-mirror.list
+yum_mirror/files/Dockerfile
+yum_mirror/files/rundnf.sh
+yum_mirror/files/yum-mirrors.repo
+pypi_mirror/files/Dockerfile
+pypi_mirror/files/bandersnatch.conf
 
 # Distribution / packaging
 bin/
