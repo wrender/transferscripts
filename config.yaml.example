@@ -143,6 +143,7 @@ pypi:
   timeofday: ''
   onstartup: False
   timeout: '30'
+  forcecheck: False
   plugins:
     - exclude_platform
     - allowlist_project
