@@ -57,3 +57,10 @@ The sync_registry service is installed on the server that can view the remote di
 -  Once the service is running on the DMZ server, you can view the log at /opt/mirrorsync/mirrorsync.log to view information, or run `sudo systemctl status mirrorsync` to view systemctl status
 
 -  You can list images in /opt/mirrorsync/container_mirror/images.txt that you want to syncronize from the internet. For example: `echo "httpd:2.4.54" >> /opt/mirrorsync/container_images.txt`
+
+# Troubleshooting
+ - Look for errors in the service with `sudo journalctl -e -u mirrorsync`
+ - Check the log with `sudo tail -f /opt/mirrorsync/mirrorsync.log`
+ - Modules that have long running jobs there is an rclone log. For example:  `sudo tail -f /opt/mirrorsync/pypi_mirror/rclone.log` or "previous-rclone.log" for the prevous run.
+ - Some individual components run in a docker container like apt_mirror.  If they are set to start, and are failing check the status with something like:  `sudo docker logs -f apt-mirror`
+

@@ -143,6 +143,7 @@ pypi:
   timeofday: ''
   onstartup: False
   timeout: '30'
+  # Forces a full check/sync. See https://bandersnatch.readthedocs.io/en/latest/#bandersnatch-mirror
   forcecheck: False
   plugins:
     - exclude_platform
