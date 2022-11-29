@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import logging
-import registrysync
+import registrysync_run
 
 logger = logging.getLogger()
 fhandler = logging.FileHandler(filename='/opt/registrysync/registrysync.log', mode='a')
@@ -10,4 +10,4 @@ logger.addHandler(fhandler)
 logger.setLevel(logging.INFO)
 
 while True:
-    registrysync.toregistry()
+    registrysync_run.toregistry()

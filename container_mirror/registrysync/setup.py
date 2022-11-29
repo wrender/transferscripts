@@ -2,7 +2,6 @@
 import jinja2
 import yaml
 import subprocess
-import registrysync_build
 
 with open('/opt/registrysync/config.yaml') as f:
     cfg = yaml.load(f, Loader=yaml.SafeLoader)
@@ -28,5 +27,5 @@ except Exception as e:
     print(e)
 
 else:
-    print('\n' + 'Systemd service setup. You can start service with "systemctl enable registrysync --now')
+    print('\n' + 'Systemd service setup. You can start service with "systemctl enable registrysync --now"')
 

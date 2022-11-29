@@ -1,12 +1,11 @@
 [Unit]
-Description=syncregistry application
+Description=registysync application
 After=docker.service
 Requires=docker.service
 
 [Service]
 TimeoutStartSec=0
 User={{ cfg.systemduser }}
-Group={{ cfg.systemduser }}
 Restart=always
 ExecStart=/usr/bin/python3 /opt/registrysync/main.py
 Environment=PYTHONPATH=/opt/registrysync/
