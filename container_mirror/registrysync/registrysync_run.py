@@ -27,11 +27,9 @@ def toregistry():
             # Try to syncronize files to image registry
             print('Syncing images to repository...')
             logger.info('Syncing images to repository...')
-            skopeocommand = ['sync','--dest-tls-verify=' + str(cfg['registrysync']['skopeo']['dest-tls-verify']),'--src','dir','--dest','docker','/mnt/repos',cfg['registrysync']['skopeo']['registrydestination'] ]
 
+            subprocess.run(['docker','run','--rm','-v',tempsrcdir + ':/mnt/repos','registry-sync:v1.0','sync','--dest-tls-verify=False','--src','dir','--dest','docker','/mnt/repos',cfg['registrysync']['skopeo']['registrydestination']])
 
-            subprocess.run(['docker','run','--rm','-v',tempsrcdir + ':/mnt/repos','registry-sync:v1.0',skopeocommand])
-            
         except Exception as e:
             print(e)
             logger.error(e)
