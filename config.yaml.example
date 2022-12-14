@@ -12,12 +12,15 @@ mirrorsync:
 # Skopeo Settings
 skopeo:
   enabled: True
-  # Local Destination to sync to
-  destination: "/tmp/mirrors/containers/"
+  destination: '/tmp/mirrors/containers/'
   # How often to sync images in images.txt in minutes. Scopeo runs
   # continiously and checks at this interval for new images to pull from images.txt.
   frequency: '1'
   dryrun: True
+  # List of registry names to strip from path
+  stripregistry: ['quay.io','docker.io','gcr.io']
+  # Scoped re-creates the entire registry path. You probably don't want this.
+  scoped: False
   # Enable authentication for skopeo inspect and sync
   authentication:
     enabled: False

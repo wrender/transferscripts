@@ -51,7 +51,7 @@ def main():
         if timeofday is not None and len(timeofday) != 0:
             schedule.every().day.at(str(timeofday)).do(run_threaded,threadname,task)
         if frequency is not None and len(frequency) != 0:
-            schedule.every(int(frequency)).minutes.do(run_threaded,threadname,task)
+            schedule.every(int(frequency)).seconds.do(run_threaded,threadname,task)
 
     # Schedule to call various module runs at different times
     if cfg['apt']['enabled'] == True:

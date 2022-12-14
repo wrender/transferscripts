@@ -6,6 +6,7 @@ import json
 import docker
 import yaml
 import os
+import pathlib
 
 
 # Get Configuration Values
@@ -42,16 +43,57 @@ def getimagedigest(name):
         logger.error('Could not get digest of image')
     return imagedigest
 
+# Extract Image Path and return the middle part of the path
+def getimagepath(item):
+    imagepath = pathlib.PurePath(item)
+    def count_parents(path):
+        return len(path.parts)
+
+    if count_parents(imagepath) > 1:
+
+        # Remove leading registry address from path
+        if imagepath.parts[0] in cfg['skopeo']['stripregistry']:
+            result = imagepath.relative_to(*imagepath.parts[:1])
+            result2 = pathlib.PurePath(result)
+            
+            if str(result2.parent) == '.':
+                skopeopath = ''
+                print('skopeopath: ' + skopeopath)
+            else:
+                skopeopath = '/' + str(result2.parent)
+                print('skopeopath: ' + skopeopath)
+        # Else get the parents
+        else:
+            result = imagepath.parents[0]
+            if str(result) == '.':
+                skopeopath = ''
+                print('skopeopath: ' + skopeopath)
+            else:
+                skopeopath = '/' + str(result)
+                print('skopeopath: ' + skopeopath)
+    else:
+        skopeopath = ''
+        print('skopeopath: ' + skopeopath)
+
+    return skopeopath
 
 # Function to run skopeo
 def skopeosync(dockerimage):
+
+    # Set the skopeo destinatio path to create registry structure
+    skopeopath = getimagepath(dockerimage)
+    
+    # Create the skopeo command syntax
     skopeocmd = ['sync','--keep-going']
     if cfg['skopeo']['dryrun']:
         skopeocmd.append("--dry-run")
     if cfg['skopeo']['authentication']['enabled']:
         skopeocmd.append('--authfile=' + cfg['skopeo']['authentication']['authfile'])
-    skopeocmd.extend(['--scoped','--src','docker','--dest', 'dir', dockerimage,'/mnt/repos'])
-            
+    if cfg['skopeo']['scoped']:
+        skopeocmd.append('--scoped')
+    skopeocmd.extend(['--src','docker','--dest', 'dir', dockerimage,'/mnt/repos/' + skopeopath ])
+
+
     # Try to get image with scopeo
     try:
         imagedigest = getimagedigest(dockerimage)
@@ -111,7 +153,6 @@ def writedb(name, digest):
     cursor.execute("INSERT INTO transferred (name, digest) VALUES (?, ?)",(name, digest))
     connection.commit()
     cursor.close()
-
     return
 
 # Function to rclone data from container mirror to ssh destination
@@ -170,6 +211,7 @@ def runcontainermirror(imagelist=None):
 
     # For each container image name in the file list images.txt
     for line in alist:
+
         
         # Check if colon is not in line item. As skopeo will download all tags in this case.
         if ':' not in line:
