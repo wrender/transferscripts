@@ -44,14 +44,15 @@ This service runs on a server in the DMZ that has access to the internet. It dow
 12. Run the service:  sudo systemctl  enable mirrorsync --now
 
 ### Secure Server
-The sync_registry service is installed on the server that can view the remote directory, and has access to the docker registry.
-1. Put contents of /opt/mirrorsync/container_mirror/sync_registry into /opt/sync_registry
-2. Edit /opt/sync_registry/config.yaml to suit your needs
+The registrysync service is installed on the server that can view the remote directory, and has access to the docker registry.
+1. Put contents of /opt/mirrorsync/container_mirror/registrysync into /opt/registrysync
+2. Edit /opt/registrysync/config.yaml to suit your needs
 3. Setup local destination directories  (Should be larger storage. 1TB at least)
-4. Setup user, ssh key, and destination directories (Setup passwordless ssh key, so both systems can ssh)
-5. Install python plugins in files/python-plugins. For example: `python3 -m pip install ./downloads/SomeProject-1.0.4.tar.gz`
-6. Run setup: `sudo /opt/sync_registry/setup.py`
-7. Run the service:  sudo systemctl  enable mirrorsync --now
+4. Setup a user to run the service as
+5. Set ownership of /opt/registrysync to user
+6. On the DMZ server, export the container-mirror:v1.0 image. Manually copy it to the secure server and tag it: registry-sync:v1.0. This image contains skopeo which is used to syncronize docker images between repositories
+7. Run /opt/registrysync/setup.py to setup the systemd service
+8. Run the service:  `sudo systemctl  enable registrysync --now`
 
 ## Usage
 -  Once the service is running on the DMZ server, you can view the log at /opt/mirrorsync/mirrorsync.log to view information, or run `sudo systemctl status mirrorsync` to view systemctl status
