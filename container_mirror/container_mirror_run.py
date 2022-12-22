@@ -91,6 +91,8 @@ def skopeosync(dockerimage):
         skopeocmd.append('--authfile=' + cfg['skopeo']['authentication']['authfile'])
     if cfg['skopeo']['scoped']:
         skopeocmd.append('--scoped')
+    if cfg['skopeo']['preservedigests']:
+        skopeocmd.append('--preserve-digests')
     skopeocmd.extend(['--src','docker','--dest', 'dir', dockerimage,'/mnt/repos/' + skopeopath ])
 
 

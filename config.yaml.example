@@ -21,6 +21,7 @@ skopeo:
   stripregistry: ['quay.io','docker.io','gcr.io']
   # Scoped re-creates the entire registry path. You probably don't want this.
   scoped: False
+  preservedigests: True
   # Enable authentication for skopeo inspect and sync
   authentication:
     enabled: False
