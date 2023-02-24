@@ -4,6 +4,8 @@ RUN apt-get update -q \
     apt install -y -qq apt-mirror \
   && \
     touch /var/log/cron.log
+COPY apt-mirror /usr/bin/apt-mirror
+RUN chown root:root /usr/bin/apt-mirror && chmod 755 /usr/bin/apt-mirror
 {% if mirrorsync.systemduser != 'root' -%}
 RUN useradd -u {{ mirrorsync.systemduid }} -ms /bin/bash {{ mirrorsync.systemduser }}
 USER {{ mirrorsync.systemduser }}
