@@ -30,18 +30,19 @@ Note: Skopeo sync is limited to about 200 anonymous pulls per day from docker hu
 ## Installation
 ### DMZ Server
 This service runs on a server in the DMZ that has access to the internet. It downloads repositories from the internet using various methods.
-1. Git clone the project to /opt/mirrorsync/
-2. Install python3.10 or newer, python3.10-pip or newer
-3. Setup a virtual environment:  See: https://docs.python.org/3/library/venv.html
-4. Switch to the virtual environment and install python plugins in files/python-plugins. For example: `pip3.10 install ./downloads/SomeProject-1.0.4.tar.gz`
-5. Edit the configuration of /opt/mirrorsync/config.yaml to suit your needs
-6. Setup local destination directories  (Should be larger storage. 1TB at least)
-7. Ensure the directories are setup with ownership of user defined in config.yaml
-8. Set ownership of /opt/mirrorsync to user defined in config.yaml
-9. Run setup: `sudo /opt/mirrosync/setup.py`
-10. Generate ssh keys for the user. `ssh-keygen` and setup SSH connection to secure server.
-11. Run `rclone config` and setup a new remote called "remote" using the SSH keys to authenticate to the remote. The remote should be address of the secure server.
-12. Run the service:  sudo systemctl  enable mirrorsync --now
+1. Create a linux user for example mirrorsync with a home folder and add to docker group
+2. Git clone the project to /opt/mirrorsync/
+3. Install python3.10 or newer, python3.10-pip or newer
+4. Setup a virtual environment:  See: https://docs.python.org/3/library/venv.html  Example: `cd /home/mirrorsync/ && python -m venv virtualenv`
+5. Switch to the virtual environment and install python plugins in files/python-plugins. Example: `source /home/mirrorsync/virtualenv/bin/activate && pip install ./downloads/SomeProject-1.0.4.tar.gz`
+6. Edit the configuration of /opt/mirrorsync/config.yaml to suit your needs
+7. Setup local destination directories  (Should be larger storage. 1TB at least)
+8. Ensure the directories are setup with ownership of user defined in config.yaml
+9. Set ownership of /opt/mirrorsync to user defined in config.yaml
+10. Run setup: `sudo /opt/mirrosync/setup.py`
+11. Generate ssh keys for the user. `ssh-keygen` and setup SSH connection to secure server.
+12. Run `rclone config` and setup a new remote called "remote" using the SSH keys to authenticate to the remote. The remote should be address of the secure server.
+13. Run the service:  sudo systemctl  enable mirrorsync --now
 
 ### Secure Server
 The registrysync service is installed on the server that can view the remote directory, and has access to the docker registry.
